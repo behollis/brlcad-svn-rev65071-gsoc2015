@@ -166,6 +166,7 @@ set(LIBGED_SOURCES
   nmg_collapse.c
   nmg_fix_normals.c
   nmg_simplify.c
+  nmg_mrsv.c
   ocenter.c
   open.c
   orient.c

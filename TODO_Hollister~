@@ -1,0 +1,41 @@
+Project Schedule Milestones:
+
+Week 1: Add placeholder commands by following example in commit
+46507, which adds the exist command. Make sure that commands can
+be added and data is reflected internally.
+
+Week 2: Identify ways of specifying to the command-line the parts of
+model to be changed. For example, how to specify a vertex to a command
+that removes a vertex and update the NMG model in the render window.
+
+Week 3: Should be able to implement commands now. Allow two weeks
+to complete each type of command. Starting this week with NMG CON-
+STRUCTION ROUTINES.
+
+Week 4: NMG - 2nd week for CONSTRUCTION ROUTINES.
+
+Week 5: NMG - 1st week for DESTRUCTION ROUTINES.
+
+Week 6: NMG - 2nd week for DESTRUCTION ROUTINES. *MID-
+TERM*
+
+Week 7: NMG - 1st week for MANIPULATION ROUTINES.
+
+Week 8: NMG - 2nd week for MANIPULATION ROUTINES.
+
+Week 9: Start BoTs command-line command implementations. Assum-
+ing these will “mirror” those for NMGs. Starting this week with BoT
+CONSTRUCTION ROUTINES.
+
+Week 10: BoT - 2nd week for CONSTRUCTION ROUTINES.
+
+Week 11: BoT - 1st week for DESTRUCTION ROUTINES.
+
+Week 12: BoT - 2nd week for DESTRUCTION ROUTINES.
+
+Week 13: BoT - 1st week for MANIPULATION ROUTINES.
+
+Week 14: BoT - 2nd week for MANIPULATION ROUTINES. Final fixes
+and polish.
+
+More info: http://brlcad.org/wiki/User:Bhollister/Proposal

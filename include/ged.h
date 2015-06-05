@@ -1329,6 +1329,11 @@ GED_EXPORT extern int ged_nmg_fix_normals(struct ged *gedp, int argc, const char
 GED_EXPORT extern int ged_nmg_simplify(struct ged *gedp, int argc, const char *argv[]);
 
 /**
+ * NMG mrsv
+ */
+GED_EXPORT extern int ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[]);
+
+/**
  * Set/get object center.
  */
 GED_EXPORT extern int ged_ocenter(struct ged *gedp, int argc, const char *argv[]);
