@@ -166,7 +166,20 @@ set(LIBGED_SOURCES
   nmg_collapse.c
   nmg_fix_normals.c
   nmg_simplify.c
+  nmg_me.c
+  nmg_eins.c
+  nmg_esplit.c
+  nmg_eusplit.c
+  nmg_meonvu.c
+  nmg_mf.c
+  nmg_ml.c
+  nmg_mlv.c
+  nmg_mm.c
+  nmg_mmr.c
   nmg_mrsv.c
+  nmg_msv.c
+  nmg_mvu.c
+  nmg_mvvu.c
   ocenter.c
   open.c
   orient.c

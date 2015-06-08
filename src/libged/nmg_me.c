@@ -1,4 +1,4 @@
-/*                         N M G _ M R S V . C
+/*                         N M G _ M E . C
  * BRL-CAD
  *
  * Copyright (c) 2008-2014 United States Government as represented by
@@ -17,9 +17,9 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file libged/nmg_mrsv.c
+/** @file libged/nmg_me.c
  *
- * The nmg_mrsv command.
+ * The nmg_me command.
  *
  */
 
@@ -32,7 +32,7 @@
 
 #include "./ged_private.h"
 
-int ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[])
+int ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 {
 	return 0;
 }

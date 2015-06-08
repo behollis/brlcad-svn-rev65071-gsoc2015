@@ -1329,9 +1329,87 @@ GED_EXPORT extern int ged_nmg_fix_normals(struct ged *gedp, int argc, const char
 GED_EXPORT extern int ged_nmg_simplify(struct ged *gedp, int argc, const char *argv[]);
 
 /**
- * NMG mrsv
+ * Make Model. Creates a new NMG model structure and fills in the appropriate fields.
+ * The result is an empty model.
+ */
+GED_EXPORT extern int ged_nmg_mm(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Model, Region. Creates a new model and creates a region within the model.
+ * The region is empty.
+ */
+GED_EXPORT extern int ged_nmg_mmr(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Shell, Vertex. Creates a new shell consisting of a single vertex in the
+ * parameter region. A new vertex is created for the shell.
+ */
+GED_EXPORT extern int ged_nmg_msv(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Region, Shell, Vertex. Creates a new region within the existing model, and
+ * creates a shell of a single vertex within the region.
  */
 GED_EXPORT extern int ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Vertex, Vertexuse. Exists so that shells, loops and edges can be created
+ * on a new vertex.
+ */
+GED_EXPORT extern int ged_nmg_mvvu(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Vertexuse. Allocates a new vertexuse for an existing vertex.
+ */
+GED_EXPORT extern int ged_nmg_mvu(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Edge. Creates a new wire edge in the shell specified.
+ */
+GED_EXPORT extern int ged_nmg_me(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Edge on existing Vertexuse. Is used to create an edge on a vertex in a loop
+ * or shell. The resultant edge has the same vertex at each endpoint.
+ */
+GED_EXPORT extern int ged_nmg_meonvu(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Edgeuse Split. Splits an existing edgeuse pair of a wire or "dangling" face-edge
+ * by inserting a new vertex.
+ */
+GED_EXPORT extern int ged_nmg_eusplit(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Edge Split. Causes a new vertex to be inserted along an existing edge.
+ */
+GED_EXPORT extern int ged_nmg_esplit(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Edge Insert. Inserts a new, zero length edge between the edge associated with the
+ * parameter edgeuse and the edge associated with the edgeuse "previous" to the
+ * parameter edgeuse.
+ */
+GED_EXPORT extern int ged_nmg_eins(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Loop. Takes the largest possible number of contiguous wire edges which form
+ * a circuit from the parameter shell and uses them to create a wire loop in the shell.
+ */
+GED_EXPORT extern int ged_nmg_ml(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Loop, Vertex. Creates a new vertex-loop. The loop will be a child of the
+ * structure indicated by the magic number pointer parameter, and will have the
+ * specified orientation. If the vertex is NULL, a new vertex is created
+ * for the loop.
+ */
+GED_EXPORT extern int ged_nmg_mlv(struct ged *gedp, int argc, const char *argv[]);
+
+/**
+ * Make Face. Generates a new face from the parameter wire loop and its mate.
+ */
+GED_EXPORT extern int ged_nmg_mf(struct ged *gedp, int argc, const char *argv[]);
 
 /**
  * Set/get object center.
