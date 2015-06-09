@@ -239,7 +239,6 @@ static struct cmdtab mged_cmdtab[] = {
     {"nmg_mf", cmd_ged_plain_wrapper, ged_nmg_mf},
     {"nmg_ml", cmd_ged_plain_wrapper, ged_nmg_ml},
     {"nmg_mlv", cmd_ged_plain_wrapper, ged_nmg_mlv},
-    {"nmg_mm", cmd_ged_plain_wrapper, ged_nmg_mm},
     {"nmg_mmr", cmd_ged_plain_wrapper, ged_nmg_mmr},
     {"nmg_mrsv", cmd_ged_plain_wrapper, ged_nmg_mrsv},
     {"nmg_msv", cmd_ged_plain_wrapper, ged_nmg_msv},

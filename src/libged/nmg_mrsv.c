@@ -32,9 +32,49 @@
 
 #include "./ged_private.h"
 
-int ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[])
+int
+ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[])
 {
-	return 0;
+	struct rt_db_internal nmg_intern;
+	struct directory *dp;
+	const char *nmg_name;
+	struct model *m;
+	int ret = GED_ERROR;
+
+	static const char *usage = "nmg_name";
+
+	GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
+	GED_CHECK_READ_ONLY(gedp, GED_ERROR);
+	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
+
+	if (argc != 2) {
+    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+    return GED_HELP;
+    }
+
+	/* attempt to resolve and verify before we jump in */
+	nmg_name = argv[1];
+
+	if ((dp=db_lookup(gedp->ged_wdbp->dbip, nmg_name, LOOKUP_QUIET)) == RT_DIR_NULL) {
+    bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", nmg_name);
+	return GED_ERROR;
+	}
+
+	if (rt_db_get_internal(&nmg_intern, dp, gedp->ged_wdbp->dbip, bn_mat_identity, &rt_uniresource) < 0) {
+    bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
+	return GED_ERROR;
+	}
+
+	if (nmg_intern.idb_type != ID_NMG) {
+    bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", nmg_name);
+	rt_db_free_internal(&nmg_intern);
+	return GED_ERROR;
+	}
+
+	m = (struct model *)nmg_intern.idb_ptr;
+	NMG_CK_MODEL(m);
+
+	return ret;
 }
 
 /*

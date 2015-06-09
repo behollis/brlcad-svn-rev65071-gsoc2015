@@ -1329,12 +1329,6 @@ GED_EXPORT extern int ged_nmg_fix_normals(struct ged *gedp, int argc, const char
 GED_EXPORT extern int ged_nmg_simplify(struct ged *gedp, int argc, const char *argv[]);
 
 /**
- * Make Model. Creates a new NMG model structure and fills in the appropriate fields.
- * The result is an empty model.
- */
-GED_EXPORT extern int ged_nmg_mm(struct ged *gedp, int argc, const char *argv[]);
-
-/**
  * Make Model, Region. Creates a new model and creates a region within the model.
  * The region is empty.
  */

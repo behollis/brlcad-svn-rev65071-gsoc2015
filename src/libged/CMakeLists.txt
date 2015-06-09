@@ -174,7 +174,6 @@ set(LIBGED_SOURCES
   nmg_mf.c
   nmg_ml.c
   nmg_mlv.c
-  nmg_mm.c
   nmg_mmr.c
   nmg_mrsv.c
   nmg_msv.c

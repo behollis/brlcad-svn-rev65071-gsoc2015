@@ -32,9 +32,10 @@
 
 #include "./ged_private.h"
 
-int ged_nmg_mvvu(struct ged *gedp, int argc, const char *argv[])
+int
+ged_nmg_mvvu(struct ged *gedp, int argc, const char *argv[])
 {
-	return 0;
+	return GED_ERROR;
 }
 
 /*
