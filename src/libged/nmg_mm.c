@@ -1,4 +1,4 @@
-/*                         N M G _ M R S V . C
+/*                         N M G _ M M . C
  * BRL-CAD
  *
  * Copyright (c) 2008-2014 United States Government as represented by
@@ -17,14 +17,15 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file libged/nmg_mrsv.c
+/** @file libged/nmg_mm.c
  *
- * The nmg_mrsv command.
+ * The nmg_ml command.
  *
  */
 
 #include "common.h"
 
+#include <signal.h>
 #include <string.h>
 
 #include "bu/cmd.h"
@@ -33,47 +34,43 @@
 #include "./ged_private.h"
 
 int
-ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[])
+ged_nmg_mm(struct ged *gedp, int argc, const char *argv[])
 {
-	struct rt_db_internal nmg_intern;
-	struct directory *dp;
-	const char *nmg_name;
+	struct rt_db_internal internal;
 	struct model *m;
-
-	static const char *usage = "nmg_name";
+	struct directory *dp;
+	const char *name;
+	static const char *usage = "name";
 
 	GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
 	GED_CHECK_READ_ONLY(gedp, GED_ERROR);
 	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
 	if (argc != 2) {
-    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-    return GED_HELP;
-    }
-
-	/* attempt to resolve and verify before we jump in */
-	nmg_name = argv[1];
-
-	if ((dp=db_lookup(gedp->ged_wdbp->dbip, nmg_name, LOOKUP_QUIET)) == RT_DIR_NULL) {
-    bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", nmg_name);
-    return GED_ERROR;
+		bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+		return GED_HELP;
 	}
 
-	if (rt_db_get_internal(&nmg_intern, dp, gedp->ged_wdbp->dbip, bn_mat_identity, &rt_uniresource) < 0) {
-    bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
-    return GED_ERROR;
-	}
+	/* attempt to resolve and verify */
+	name = argv[1];
 
-	if (nmg_intern.idb_type != ID_NMG) {
-    bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", nmg_name);
-    rt_db_free_internal(&nmg_intern);
-    return GED_ERROR;
-	}
+	GED_CHECK_EXISTS(gedp, name, LOOKUP_QUIET, GED_ERROR);
+	RT_DB_INTERNAL_INIT(&internal);
 
-	m = (struct model *)nmg_intern.idb_ptr;
-	NMG_CK_MODEL(m);
+	m = nmg_mm();
 
-	nmg_mrsv(m);
+	internal.idb_major_type = DB5_MAJORTYPE_BRLCAD;
+	internal.idb_type = ID_NMG;
+	internal.idb_meth = &OBJ[ID_NMG];
+	internal.idb_ptr = (void *)m;
+
+	/* no interrupts */
+	(void)signal(SIGINT, SIG_IGN);
+
+	/* add model to database */
+	GED_DB_DIRADD(gedp, dp, name, RT_DIR_PHONY_ADDR, 0,
+			      RT_DIR_SOLID, (void *)&internal.idb_type, GED_ERROR);
+	GED_DB_PUT_INTERNAL(gedp, dp, &internal, &rt_uniresource, GED_ERROR);
 
 	return GED_OK;
 }

@@ -231,6 +231,7 @@ static struct cmdtab mged_cmdtab[] = {
     {"nmg_collapse", cmd_nmg_collapse, GED_FUNC_PTR_NULL},
     {"nmg_fix_normals", cmd_ged_plain_wrapper, ged_nmg_fix_normals},
     {"nmg_simplify", cmd_ged_plain_wrapper, ged_nmg_simplify},
+    {"nmg_mm", cmd_ged_plain_wrapper, ged_nmg_mm},
     {"nmg_eins", cmd_ged_plain_wrapper, ged_nmg_eins},
     {"nmg_esplit", cmd_ged_plain_wrapper, ged_nmg_esplit},
     {"nmg_eusplit", cmd_ged_plain_wrapper, ged_nmg_eusplit},
