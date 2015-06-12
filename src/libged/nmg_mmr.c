@@ -25,6 +25,7 @@
 
 #include "common.h"
 
+#include <signal.h>
 #include <string.h>
 
 #include "bu/cmd.h"
@@ -35,7 +36,43 @@
 int
 ged_nmg_mmr(struct ged *gedp, int argc, const char *argv[])
 {
-	return GED_ERROR;
+	struct rt_db_internal internal;
+	struct model *m;
+	struct directory *dp;
+	const char *name;
+	static const char *usage = "name";
+
+	GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
+	GED_CHECK_READ_ONLY(gedp, GED_ERROR);
+	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
+
+	if (argc != 2) {
+		bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+		return GED_HELP;
+	}
+
+	/* attempt to resolve and verify */
+	name = argv[1];
+
+	GED_CHECK_EXISTS(gedp, name, LOOKUP_QUIET, GED_ERROR);
+	RT_DB_INTERNAL_INIT(&internal);
+
+	m = nmg_mmr();
+
+	internal.idb_major_type = DB5_MAJORTYPE_BRLCAD;
+	internal.idb_type = ID_NMG;
+	internal.idb_meth = &OBJ[ID_NMG];
+	internal.idb_ptr = (void *)m;
+
+	/* no interrupts */
+	(void)signal(SIGINT, SIG_IGN);
+
+	/* add model to database */
+	GED_DB_DIRADD(gedp, dp, name, RT_DIR_PHONY_ADDR, 0,
+			      RT_DIR_SOLID, (void *)&internal.idb_type, GED_ERROR);
+	GED_DB_PUT_INTERNAL(gedp, dp, &internal, &rt_uniresource, GED_ERROR);
+
+	return GED_OK;
 }
 
 /*
