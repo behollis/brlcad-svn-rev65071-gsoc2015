@@ -341,7 +341,7 @@ nmg_mrsv(struct model *m)
  *
  * upptr is a pointer to parent struct
  */
-static struct vertexuse *
+/* static */ struct vertexuse *
 nmg_mvu(struct vertex *v, uint32_t *upptr, struct model *m)
 {
     struct vertexuse *vu;
@@ -384,7 +384,7 @@ nmg_mvu(struct vertex *v, uint32_t *upptr, struct model *m)
  * This means that a vu is created but is not attached to the parent
  * structure.  This is "bad" and requires the caller to fix.
  */
-static struct vertexuse *
+/* static */ struct vertexuse *
 nmg_mvvu(uint32_t *upptr, struct model *m)
 {
     struct vertex *v;

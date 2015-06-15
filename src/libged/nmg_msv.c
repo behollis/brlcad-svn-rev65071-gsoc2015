@@ -52,33 +52,33 @@ ged_nmg_msv(struct ged *gedp, int argc, const char *argv[])
 	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
 	if (argc != 2) {
-    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-    return GED_HELP;
+		bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+		return GED_HELP;
     }
 
 	/* attempt to resolve and verify before we jump in */
 	nmg_name = argv[1];
 
 	if ((dp=db_lookup(gedp->ged_wdbp->dbip, nmg_name, LOOKUP_QUIET)) == RT_DIR_NULL) {
-    bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", nmg_name);
-    return GED_ERROR;
+		bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", nmg_name);
+		return GED_ERROR;
 	}
 
 	if (rt_db_get_internal(&nmg_intern, dp, gedp->ged_wdbp->dbip, bn_mat_identity, &rt_uniresource) < 0) {
-    bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
-    return GED_ERROR;
+		bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
+		return GED_ERROR;
 	}
 
 	if (nmg_intern.idb_type != ID_NMG) {
-    bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", nmg_name);
-    rt_db_free_internal(&nmg_intern);
-    return GED_ERROR;
+		bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", nmg_name);
+		rt_db_free_internal(&nmg_intern);
+		return GED_ERROR;
 	}
 
 	m = (struct model *)nmg_intern.idb_ptr;
 	NMG_CK_MODEL(m);
 
-	/* for now, let's just added shell and vertex for the first
+	/* for now, let's just add shell and vertex for the first
 	 * encountered region in model.
 	 * TODO: take region from CLI */
 	r = BU_LIST_FIRST(nmgregion, &m->r_hd);
