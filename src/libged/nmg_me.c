@@ -45,18 +45,18 @@ ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 	struct shell* s;
 	struct vertexuse* vu1;
 	struct vertexuse* vu2;
-
+	struct vertex_g* vg1;
+	struct vertex_g* vg2;
 	point_t v1; point_t v2;
 	int idx;
 
-	/* static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1"; */
-	static const char *usage = "nmg_name";
+	static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1";
 
 	GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
 	GED_CHECK_READ_ONLY(gedp, GED_ERROR);
 	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
-	if (argc !=2 ) { /* (argc != 8) { */
+	if (argc != 8) {
 		bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
 		return GED_HELP;
 	}
@@ -64,10 +64,8 @@ ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 	/* attempt to resolve and verify */
 	name = argv[1];
 
-#if 0
-	v1[0] = atof(argv[2]); v1[1] = atof(argv[3]); v1[3] = atof(argv[4]);
-	v2[0] = atof(argv[5]); v2[1] = atof(argv[6]); v2[3] = atof(argv[7]);
-#endif
+	v1[0] = atof(argv[2]); v1[1] = atof(argv[3]); v1[2] = atof(argv[4]);
+	v2[0] = atof(argv[5]); v2[1] = atof(argv[6]); v2[2] = atof(argv[7]);
 
 	if ( (dp=db_lookup(gedp->ged_wdbp->dbip, name, LOOKUP_QUIET))
 		== RT_DIR_NULL ) {
@@ -104,12 +102,13 @@ ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 	vu1 = (struct vertexuse*)nmg_mvvu((struct shell*)s, m);
 	vu2 = (struct vertexuse*)nmg_mvvu((struct shell*)s, m);
 
-#if 0
+	GET_VERTEX_G(vg1, m); vu1->v_p->vg_p = vg1;
+	GET_VERTEX_G(vg2, m); vu2->v_p->vg_p = vg2;
+
 	for ( idx = 0; idx < ELEMENTS_PER_POINT; idx++ ) {
 		vu1->v_p->vg_p->coord[idx] = v1[idx];
 		vu2->v_p->vg_p->coord[idx] = v2[idx];
 	}
-#endif
 
 	nmg_me(vu1->v_p, vu2->v_p, s);
 
