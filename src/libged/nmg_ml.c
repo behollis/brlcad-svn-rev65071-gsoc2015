@@ -35,7 +35,61 @@
 int
 ged_nmg_ml(struct ged *gedp, int argc, const char *argv[])
 {
-	return GED_ERROR;
+	struct rt_db_internal internal;
+	struct directory *dp;
+	struct model* m;
+	const char* name;
+	struct nmgregion* r;
+	struct shell* s;
+
+	static const char *usage = "nmg_name";
+
+	GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
+	GED_CHECK_READ_ONLY(gedp, GED_ERROR);
+	GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
+
+	if (argc != 2) {
+		bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+		return GED_HELP;
+	}
+
+	/* attempt to resolve and verify */
+	name = argv[1];
+
+	if ( (dp=db_lookup(gedp->ged_wdbp->dbip, name, LOOKUP_QUIET))
+		== RT_DIR_NULL ) {
+		bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", name);
+		return GED_ERROR;
+	}
+
+	if (rt_db_get_internal(&internal, dp, gedp->ged_wdbp->dbip,
+		bn_mat_identity, &rt_uniresource) < 0) {
+		bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
+		return GED_ERROR;
+	}
+
+	if (internal.idb_type != ID_NMG) {
+		bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", name);
+		rt_db_free_internal(&internal);
+		return GED_ERROR;
+	}
+
+	m = (struct model *)internal.idb_ptr;
+	NMG_CK_MODEL(m);
+
+	/* For now, let's just add loop the first
+	*  region's first shell.
+	*  TODO: take shell from CLI
+	*/
+	r = BU_LIST_FIRST(nmgregion, &m->r_hd);
+	NMG_CK_REGION(r);
+
+	s = BU_LIST_FIRST(shell, &r->s_hd);
+	NMG_CK_SHELL(s);
+
+	nmg_ml(s);
+
+	return GED_OK;
 }
 
 /*
