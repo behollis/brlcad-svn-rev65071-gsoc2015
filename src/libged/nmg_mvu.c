@@ -101,10 +101,10 @@ ged_nmg_mvu(struct ged *gedp, int argc, const char *argv[])
 	 * be non-unique to multiple vertices in nmg model.
 	 */
 	found = 0;
-    while (BU_LIST_WHILE(curr_r, nmgregion, &m->r_hd)) {
-    	while (BU_LIST_WHILE(curr_s, shell, &r->s_hd)) {
-    		curr_vg = curr_s->vu_p->v_p->vg_p;
-    		if ( curr_vg ) {
+	while (BU_LIST_WHILE(curr_r, nmgregion, &m->r_hd)) {
+	    while (BU_LIST_WHILE(curr_s, shell, &r->s_hd)) {
+	        curr_vg = curr_s->vu_p->v_p->vg_p;
+	        if ( curr_vg ) {
 				if ( curr_vg->coord[0] == v[0] && curr_vg->coord[1] == v[1]
 				   && curr_vg->coord[2] == v[2] ) {
 						found = 1;
