@@ -34,6 +34,8 @@
 
 #include "./ged_private.h"
 
+#if 0
+
 int
 ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 {
@@ -114,6 +116,8 @@ ged_nmg_me(struct ged *gedp, int argc, const char *argv[])
 
 	return GED_OK;
 }
+
+#endif
 
 /*
  * Local Variables:

@@ -1,0 +1,110 @@
+/*                             N M G . C
+ * BRL-CAD
+ *
+ * Copyright (c) 2015 United States Government as represented by
+ * the U.S. Army Research Laboratory.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public License
+ * version 2.1 as published by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this file; see the file named COPYING for more
+ * information.
+ */
+/** @file libged/nmg.c
+ *
+ * The nmg command.
+ *
+ */
+
+#include "common.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+
+#include "raytrace.h"
+#include "rt/geom.h"
+#include "wdb.h"
+
+#include "./ged_private.h"
+
+int
+ged_nmg(struct ged *gedp, int argc, const char *argv[])
+{
+
+    static const char *usage = "nmg <obj> [command|suffix] ";
+
+    GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
+
+    /* must be wanting help */
+    if (argc < 2) {
+    bu_vls_printf(gedp->ged_result_str, "Usage: %s\n\t%s\n", argv[0], usage);
+    bu_vls_printf(gedp->ged_result_str, "commands:\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmm             -  creates a new "
+            "NMG model structure and fills the appropriate fields. The result "
+            "is an empty model.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmmr            -  creates a new "
+            "model and creates a region within the model.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmsv            -  creates a new "
+            "shell consisting of a single vertex in the parameter region. A "
+            "new vertex is created for the shell.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmrsv           -  creates a new "
+            "region within the existing model, and creates a shell of a single "
+            "vertex within the region.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmvvu           -  exists so that "
+            "shells, loops and edges can be created on a new vertex.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmvu            -  allocates a new "
+            "vertexuse for an existing vertex.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tme             -  creates a new "
+            "wire edge in the shell specified.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmeonvu         -  is used to create "
+            "an edge on a vertex in a loop or shell. The resultant edge has "
+            "the same vertex at each endpoint.\n");
+    bu_vls_printf(gedp->ged_result_str, "\teusplit        -  splits an "
+            "existing edgeuse pair of a wire or dangling face-edge by "
+            "inserting a new vertex.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tesplit         -  causes a new "
+            "vertex to be inserted along an existing edge.\n");
+    bu_vls_printf(gedp->ged_result_str, "\teins           -  inserts a new, "
+            "zero length edge between the edge associated with the parameter "
+            "edgeuse and the edge associated with the edgeuse previous to the "
+            "parameter edgeuse.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tml             -  takes the largest "
+            "possible number of contiguous wire edges which form a circuit "
+            "from the parameter shell and uses them to create a wire loop in "
+            "the shell.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmlv            -  creates a new "
+            "vertex-loop. The loop will be a child of the structure indicated "
+            "by the magic number pointer parameter, and will have the "
+            "specified orientation. If the vertex is NULL, a new vertex is "
+            "created for the loop.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmlf            -  generates a new "
+            "face from the parameter wire loop and its mate.\n");
+    return GED_HELP;
+    }
+
+    if (argc < 3) {
+    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+    return GED_ERROR;
+    }
+
+    return GED_OK;
+}
+
+
+/*
+ * Local Variables:
+ * tab-width: 8
+ * mode: C
+ * indent-tabs-mode: t
+ * c-file-style: "stroustrup"
+ * End:
+ * ex: shiftwidth=4 tabstop=8
+ */

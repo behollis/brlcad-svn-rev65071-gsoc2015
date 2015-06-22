@@ -163,6 +163,7 @@ set(LIBGED_SOURCES
   move_arb_face.c
   mrot.c
   nirt.c
+  nmg.c
   nmg_collapse.c
   nmg_fix_normals.c
   nmg_simplify.c
