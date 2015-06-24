@@ -39,7 +39,8 @@ int
 ged_nmg(struct ged *gedp, int argc, const char *argv[])
 {
 
-    static const char *usage = "nmg <obj> [command|suffix] ";
+    static const char *usage = "nmg [command|suffix] ";
+    const char *subcmd = argv[1];
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
 
@@ -90,9 +91,60 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
     return GED_HELP;
     }
 
-    if (argc < 3) {
+    if (argc < 2) {
     bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
     return GED_ERROR;
+    }
+
+    /* advance CLI arguments for subcommands */
+    --argc;
+    ++argv;
+
+    if( BU_STR_EQUAL( "mm", subcmd ) ) {
+        ged_nmg_mm(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mmr", subcmd ) ) {
+        ged_nmg_mmr(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "msv", subcmd ) ) {
+        ged_nmg_msv(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mrsv", subcmd ) ) {
+        ged_nmg_mrsv(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mvvu", subcmd ) ) {
+        ged_nmg_mvvu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mvu", subcmd ) ) {
+        ged_nmg_mvu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "me", subcmd ) ) {
+        ged_nmg_me(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "meonvu", subcmd ) ) {
+        ged_nmg_meonvu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "eusplit", subcmd ) ) {
+        ged_nmg_eusplit(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "esplit", subcmd ) ) {
+        ged_nmg_esplit(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "eins", subcmd ) ) {
+        ged_nmg_eins(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "ml", subcmd ) ) {
+        ged_nmg_ml(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mlv", subcmd ) ) {
+        ged_nmg_mlv(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "mf", subcmd ) ) {
+        ged_nmg_mf(gedp, argc, argv);
+    }
+    else {
+        bu_vls_printf(gedp->ged_result_str, "%s is not a subcommand.", subcmd );
+        return GED_ERROR;
     }
 
     return GED_OK;

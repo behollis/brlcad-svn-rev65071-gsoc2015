@@ -34,7 +34,7 @@
 
 int ged_nmg_eusplit(struct ged *gedp, int argc, const char *argv[])
 {
-	return 0;
+	return GED_ERROR;
 }
 
 /*
