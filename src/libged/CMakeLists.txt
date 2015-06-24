@@ -181,6 +181,15 @@ set(LIBGED_SOURCES
   nmg_msv.c
   nmg_mvu.c
   nmg_mvvu.c
+  nmg_cface.c
+  nmg_cmface.c
+  nmg_keu.c
+  nmg_kfu.c
+  nmg_klu.c
+  nmg_km.c
+  nmg_kr.c
+  nmg_ks.c
+  nmg_kvu.c
   ocenter.c
   open.c
   orient.c

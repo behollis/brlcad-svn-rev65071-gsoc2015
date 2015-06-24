@@ -38,7 +38,6 @@
 int
 ged_nmg(struct ged *gedp, int argc, const char *argv[])
 {
-
     static const char *usage = "nmg [command|suffix] ";
     const char *subcmd = argv[1];
 
@@ -100,6 +99,7 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
     --argc;
     ++argv;
 
+    /* NMG CONSTRUCTION ROUTINES */
     if( BU_STR_EQUAL( "mm", subcmd ) ) {
         ged_nmg_mm(gedp, argc, argv);
     }
@@ -142,6 +142,38 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
     else if( BU_STR_EQUAL( "mf", subcmd ) ) {
         ged_nmg_mf(gedp, argc, argv);
     }
+
+    /* NMG CONSTRUCTION CONVENIENCE ROUTINES */
+    else if( BU_STR_EQUAL( "cface", subcmd ) ) {
+        ged_nmg_mf(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "cmface", subcmd ) ) {
+        ged_nmg_mf(gedp, argc, argv);
+    }
+
+    /* NMG DESTRUCTION ROUTINES */
+    else if( BU_STR_EQUAL( "keu", subcmd ) ) {
+        ged_nmg_keu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "kfu", subcmd ) ) {
+        ged_nmg_kfu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "klu", subcmd ) ) {
+        ged_nmg_klu(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "km", subcmd ) ) {
+        ged_nmg_km(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "kr", subcmd ) ) {
+        ged_nmg_kr(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "ks", subcmd ) ) {
+        ged_nmg_ks(gedp, argc, argv);
+    }
+    else if( BU_STR_EQUAL( "kvu", subcmd ) ) {
+        ged_nmg_kvu(gedp, argc, argv);
+    }
+
     else {
         bu_vls_printf(gedp->ged_result_str, "%s is not a subcommand.", subcmd );
         return GED_ERROR;
