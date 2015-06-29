@@ -35,6 +35,30 @@
 
 #include "./ged_private.h"
 
+extern int ged_nmg_mm(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mmr(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_msv(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mrsv(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mvvu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mvu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_me(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_meonvu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_eusplit(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_esplit(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_eins(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_ml(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mlv(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_mf(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_cface(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_keu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_kfu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_klu(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_km(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_kr(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_ks(struct ged *gedp, int argc, const char *argv[]);
+extern int ged_nmg_kvu(struct ged *gedp, int argc, const char *argv[]);
+
 int
 ged_nmg(struct ged *gedp, int argc, const char *argv[])
 {
@@ -145,10 +169,10 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
 
     /* NMG CONSTRUCTION CONVENIENCE ROUTINES */
     else if( BU_STR_EQUAL( "cface", subcmd ) ) {
-        ged_nmg_mf(gedp, argc, argv);
+        ged_nmg_cface(gedp, argc, argv);
     }
     else if( BU_STR_EQUAL( "cmface", subcmd ) ) {
-        ged_nmg_mf(gedp, argc, argv);
+        ged_nmg_cmface(gedp, argc, argv);
     }
 
     /* NMG DESTRUCTION ROUTINES */
