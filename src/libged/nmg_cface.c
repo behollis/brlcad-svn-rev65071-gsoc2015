@@ -34,7 +34,7 @@
 #include "./ged_private.h"
 
 int
-ged_nmg_cface(struct ged *gedp, int argc, const char *argv[])
+ged_nmg_cface(struct ged *UNUSED(gedp), int UNUSED(argc), const char *UNUSED(argv[]))
 {
     return GED_ERROR;
 }
