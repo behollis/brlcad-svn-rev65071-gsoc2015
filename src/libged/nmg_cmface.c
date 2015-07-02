@@ -39,6 +39,8 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     struct rt_db_internal internal;
     struct directory *dp;
     struct model* m;
+    struct vertexuse* vu;
+    struct vertex_g* vg;
     const char* name;
     struct nmgregion* r;
     struct shell* s;
@@ -103,6 +105,10 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
 
     for(idx = 0; idx < 4; idx++) {
         GET_VERTEX(verts[idx], m)
+        /* GET_VERTEXUSE(vu, m) */
+        GET_VERTEX_G(vg, m)
+        vg->magic = NMG_VERTEX_G_MAGIC;
+        verts[idx]->vg_p = vg;
         verts[idx]->magic = NMG_VERTEX_MAGIC;
         pverts[idx] = &verts[idx];
     }
@@ -123,7 +129,7 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     fu = nmg_cmface(s, &pverts[0], 4);
     (void)nmg_fu_planeeqn(fu, &tol);
 
-    NMG_CK_MODEL(m);
+    /* NMG_CK_MODEL(m); */
 
     return GED_OK;
 }
