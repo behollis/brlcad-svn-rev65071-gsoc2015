@@ -115,8 +115,8 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
     }
 
     if (argc < 2) {
-    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-    return GED_ERROR;
+        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+        return GED_ERROR;
     }
 
     /* advance CLI arguments for subcommands */

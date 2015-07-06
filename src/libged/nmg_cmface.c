@@ -24,6 +24,7 @@
  */
 
 #include "common.h"
+#include "nmg.h"
 
 #include <signal.h>
 #include <string.h>
@@ -32,6 +33,8 @@
 #include "rt/geom.h"
 
 #include "./ged_private.h"
+
+#define VERTNUM 3
 
 int
 ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
@@ -44,13 +47,14 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     const char* name;
     struct nmgregion* r;
     struct shell* s;
-    struct vertex *verts[4];
-    struct vertex **pverts[4];
+    struct vertex *verts[VERTNUM];
+    struct vertex **pverts[VERTNUM];
     struct faceuse *fu;
     struct bn_tol tol;
     int size, idx;
+    struct bu_list* lst;
 
-    static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1 x2 y2 z2 x3 y3 z3";
+    static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1 x2 y2 z2";
 
     size = sizeof(struct vertex);
 
@@ -58,7 +62,7 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     GED_CHECK_READ_ONLY(gedp, GED_ERROR);
     GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
-    if (argc != 14) {
+    if (argc != 2 + VERTNUM*3) {
        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
        return GED_HELP;
     }
@@ -103,9 +107,13 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     tol.perp = 0.001;
     tol.para = 0.999;
 
-    for(idx = 0; idx < 4; idx++) {
+    for(idx = 0; idx < VERTNUM; idx++) {
         GET_VERTEX(verts[idx], m)
-        /* GET_VERTEXUSE(vu, m) */
+
+        BU_GET(lst, struct bu_list);
+        BU_LIST_INIT(lst)
+        verts[idx]->vu_hd = *lst;
+
         GET_VERTEX_G(vg, m)
         vg->magic = NMG_VERTEX_G_MAGIC;
         verts[idx]->vg_p = vg;
@@ -113,23 +121,16 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
         pverts[idx] = &verts[idx];
     }
 
-    nmg_vertex_g(verts[0], (fastf_t)atof(argv[2]),
-                           (fastf_t)atof(argv[3]),
-                           (fastf_t)atof(argv[4]));
-    nmg_vertex_g(verts[1], (fastf_t)atof(argv[5]),
-                           (fastf_t)atof(argv[6]),
-                           (fastf_t)atof(argv[7]));
-    nmg_vertex_g(verts[2], (fastf_t)atof(argv[8]),
-                           (fastf_t)atof(argv[9]),
-                           (fastf_t)atof(argv[10]));
-    nmg_vertex_g(verts[3], (fastf_t)atof(argv[11]),
-                           (fastf_t)atof(argv[12]),
-                           (fastf_t)atof(argv[13]));
+    for (idx=0; idx < VERTNUM*3; idx+=3){
+        nmg_vertex_g(verts[idx/3], (fastf_t)atof(argv[idx+2]),
+                                   (fastf_t)atof(argv[idx+3]),
+                                   (fastf_t)atof(argv[idx+4]));
+    }
 
-    fu = nmg_cmface(s, &pverts[0], 4);
+    fu = nmg_cmface(s, &pverts[0], VERTNUM);
     (void)nmg_fu_planeeqn(fu, &tol);
 
-    /* NMG_CK_MODEL(m); */
+    NMG_CK_MODEL(m);
 
     return GED_OK;
 }
