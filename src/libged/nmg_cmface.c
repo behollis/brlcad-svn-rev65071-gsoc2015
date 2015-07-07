@@ -111,8 +111,12 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
         GET_VERTEX(verts[idx], m)
 
         BU_GET(lst, struct bu_list);
-        BU_LIST_INIT(lst)
+        BU_LIST_INIT_MAGIC(lst, NMG_VERTEXUSE_MAGIC)
         verts[idx]->vu_hd = *lst;
+        /*
+        vu = nmg_mvu(verts[idx], s, m);
+        BU_LIST_INSERT(lst, vu)
+        */
 
         GET_VERTEX_G(vg, m)
         vg->magic = NMG_VERTEX_G_MAGIC;
