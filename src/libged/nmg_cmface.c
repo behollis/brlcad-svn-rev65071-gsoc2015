@@ -34,7 +34,7 @@
 
 #include "./ged_private.h"
 
-#define VERTNUM 3
+#define VERTNUM 4
 
 int
 ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
@@ -51,13 +51,13 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     struct vertex **pverts[VERTNUM];
     struct faceuse *fu;
     struct bn_tol tol;
-    int size, idx;
+    int idx;
     struct bu_list* lst;
 
     static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1 x2 y2 z2";
-
+/*
     size = sizeof(struct vertex);
-
+*/
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_READ_ONLY(gedp, GED_ERROR);
     GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
