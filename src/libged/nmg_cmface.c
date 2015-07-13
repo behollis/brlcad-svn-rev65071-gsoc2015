@@ -63,8 +63,8 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
 
     num_verts = (argc - 2) / 3;
 
-    /* check for less than one vertex or incomplete vertex coordinates */
-    if (argc < ELEMENTS_PER_POINT + 2 || (argc - 2) % 3 != 0) {
+    /* check for less than three vertices or incomplete vertex coordinates */
+    if (argc < ELEMENTS_PER_POINT * 3 + 2 || (argc - 2) % 3 != 0) {
        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
        return GED_HELP;
     }
