@@ -34,8 +34,6 @@
 
 #include "./ged_private.h"
 
-#define VERTNUM 3
-
 struct tmp_v {
     point_t pt;
     struct vertex *v;
@@ -54,17 +52,19 @@ ged_nmg_cmface(struct ged *gedp, int argc, const char *argv[])
     struct faceuse *fu;
     struct bn_tol tol;
     struct vertex ***face_verts;
-    int idx;
+    int idx, num_verts;
     fastf_t *tmp;
-    int num_verts = VERTNUM;
 
-    static const char *usage = "nmg_name x0 y0 z0 x1 y1 z1 x2 y2 z2";
+    static const char *usage = "nmg_name x0 y0 z0 ... xn yn zn";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_READ_ONLY(gedp, GED_ERROR);
     GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
-    if (argc != 2 + VERTNUM*3) {
+    num_verts = (argc - 2) / 3;
+
+    /* check for less than one vertex or incomplete vertex coordinates */
+    if (argc < ELEMENTS_PER_POINT + 2 || (argc - 2) % 3 != 0) {
        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
        return GED_HELP;
     }
