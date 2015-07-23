@@ -168,28 +168,8 @@ set(LIBGED_SOURCES
   nmg_fix_normals.c
   nmg_simplify.c
   nmg_mm.c
-  nmg_me.c
-  nmg_eins.c
-  nmg_esplit.c
-  nmg_eusplit.c
-  nmg_meonvu.c
-  nmg_mf.c
-  nmg_ml.c
-  nmg_mlv.c
-  nmg_mmr.c
-  nmg_mrsv.c
-  nmg_msv.c
-  nmg_mvu.c
-  nmg_mvvu.c
-  nmg_cface.c
   nmg_cmface.c
-  nmg_keu.c
-  nmg_kfu.c
-  nmg_klu.c
-  nmg_km.c
-  nmg_kr.c
-  nmg_ks.c
-  nmg_kvu.c
+  nmg_kill.c
   ocenter.c
   open.c
   orient.c
