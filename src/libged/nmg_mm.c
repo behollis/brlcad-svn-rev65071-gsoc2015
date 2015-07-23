@@ -40,7 +40,7 @@ ged_nmg_mm(struct ged *gedp, int argc, const char *argv[])
     struct model *m;
     struct directory *dp;
     const char *name;
-    static const char *usage = "name";
+    static const char *usage = "mm name";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_READ_ONLY(gedp, GED_ERROR);
@@ -52,7 +52,7 @@ ged_nmg_mm(struct ged *gedp, int argc, const char *argv[])
     }
 
     /* attempt to resolve and verify */
-    name = argv[1];
+    name = argv[0];
 
     GED_CHECK_EXISTS(gedp, name, LOOKUP_QUIET, GED_ERROR);
     RT_DB_INTERNAL_INIT(&internal);
