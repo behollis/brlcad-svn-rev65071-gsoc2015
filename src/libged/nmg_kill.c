@@ -24,18 +24,34 @@
  */
 
 #include "common.h"
+#include "vmath.h"
+#include "raytrace.h"
 
 #include <string.h>
 
 #include "bu/cmd.h"
 #include "bu/getopt.h"
+#include "../mged/mged.h"
+#include "../mged/sedit.h"
+#include "../mged/mged_dm.h"
 
 #include "./ged_private.h"
 
+#if 0
+#include <math.h>
+#include <signal.h>
+
+#include "vmath.h"
+
+
+#endif
+
+int labelvert();
 
 int
-ged_nmg_kill_v(struct ged *gedp, int argc, const char *argv[])
+ged_nmg_kill_v(struct ged * gedp, int UNUSED(argc), const char* argv[])
 {
+#if 0
     struct directory *dp;
     static const char *usage = "kill V vertex-list";
 
@@ -52,6 +68,9 @@ ged_nmg_kill_v(struct ged *gedp, int argc, const char *argv[])
     bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
     return GED_HELP;
     }
+#endif
+
+    labelvert(gedp,argv[0]);
 
 #if 0
     bu_optind = 1;
@@ -114,6 +133,49 @@ ged_nmg_kill_v(struct ged *gedp, int argc, const char *argv[])
 #endif
 
     return GED_OK;
+}
+
+/* Usage:  labelvert solid(s) */
+int
+labelvert(struct ged * gedp, char* obj)
+{
+    struct display_list *gdlp;
+    struct display_list *next_gdlp;
+    int i;
+    struct bn_vlblock*vbp;
+    struct directory *dp;
+    mat_t mat;
+    fastf_t scale;
+    struct solid *s;
+
+    vbp = rt_vlblock_init();
+    MAT_IDN(mat);
+    bn_mat_inv(mat, view_state->vs_gvp->gv_rotation);
+    scale = view_state->vs_gvp->gv_size / 100;      /* divide by # chars/screen */
+
+    /* Find uses of this solid in the solid table */
+    gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
+    while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
+            next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
+
+            FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
+            if (db_full_path_search(&s->s_fullpath, dp)) {
+                rt_label_vlist_verts(vbp, &s->s_vlist, mat, scale, base2local);
+            }
+        }
+
+        gdlp = next_gdlp;
+    }
+
+#if 0
+    cvt_vlblock_to_solids(vbp, "_LABELVERT_", 0);
+#endif
+
+    bn_vlblock_free(vbp);
+
+#if 0
+    update_views = 1;
+#endif
 }
 
 

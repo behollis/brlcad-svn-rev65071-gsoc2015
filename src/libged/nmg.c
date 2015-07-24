@@ -77,7 +77,7 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
         ged_nmg_cmface(gedp, argc, argv);
     }
     else if( BU_STR_EQUAL( "kill", subcmd ) ) {
-            ged_nmg_kill_v(gedp, argc, argv);
+        ged_nmg_kill_v(gedp, argc, argv);
     }
     else {
         bu_vls_printf(gedp->ged_result_str, "%s is not a subcommand.", subcmd );
