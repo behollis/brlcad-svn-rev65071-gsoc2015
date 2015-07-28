@@ -24,36 +24,32 @@
  */
 
 #include "common.h"
-#include "vmath.h"
-#include "raytrace.h"
 
 #include <string.h>
 
 #include "bu/cmd.h"
-#include "bu/getopt.h"
-#include "../mged/mged.h"
-#include "../mged/sedit.h"
-#include "../mged/mged_dm.h"
+#include "rt/geom.h"
 
 #include "./ged_private.h"
 
-#if 0
-#include <math.h>
-#include <signal.h>
-
-#include "vmath.h"
-
-
-#endif
-
-int labelvert();
-
 int
-ged_nmg_kill_v(struct ged * gedp, int UNUSED(argc), const char* argv[])
+ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
 {
-#if 0
+    struct rt_db_internal internal;
     struct directory *dp;
-    static const char *usage = "kill V vertex-list";
+    struct model* m;
+    const char* name;
+    struct nmgregion* r;
+    struct shell* s;
+    point_t v;
+    struct nmgregion* curr_r;
+    struct shell* curr_s;
+    struct vertex_g* curr_vg;
+    struct vertexuse* curr_vu;
+    int idx;
+    int found;
+
+    static const char *usage = "kill V coords";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_DRAWABLE(gedp, GED_ERROR);
@@ -64,119 +60,80 @@ ged_nmg_kill_v(struct ged * gedp, int UNUSED(argc), const char* argv[])
     bu_vls_trunc(gedp->ged_result_str, 0);
 
     /* must be wanting help */
-    if (argc < 3) {
+    if (argc < 6) {
     bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
     return GED_HELP;
     }
-#endif
 
-    labelvert(gedp,argv[0]);
+    /* attempt to resolve and verify */
+    name = argv[0];
+
+    if ( (dp=db_lookup(gedp->ged_wdbp->dbip, name, LOOKUP_QUIET))
+        == RT_DIR_NULL ) {
+        bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", name);
+        return GED_ERROR;
+    }
+
+    if (rt_db_get_internal(&internal, dp, gedp->ged_wdbp->dbip,
+        bn_mat_identity, &rt_uniresource) < 0) {
+        bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
+        return GED_ERROR;
+    }
+
+    if (internal.idb_type != ID_NMG) {
+        bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", name);
+        rt_db_free_internal(&internal);
+        return GED_ERROR;
+    }
+
+    v[0] = atof(argv[3]); v[1] = atof(argv[4]); v[2] = atof(argv[5]);
+
+    m = (struct model *)internal.idb_ptr;
+    NMG_CK_MODEL(m);
+    r = BU_LIST_FIRST(nmgregion, &m->r_hd);
+    NMG_CK_REGION(r);
+    s = BU_LIST_FIRST(shell, &r->s_hd);
+    NMG_CK_SHELL(s);
 
 #if 0
-    bu_optind = 1;
-    while ((c = bu_getopt(argc, (char * const *)argv, "fn")) != -1) {
-    switch (c) {
-        case 'f':
-        force = 1;
-        break;
-        case 'n':
-        nflag = 1;
-        break;
-        default:
-        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-        return GED_ERROR;
-    }
-    }
-
-    if ((force + nflag) > 1) {
-    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-    return GED_ERROR;
-    }
-
-    argc -= (bu_optind - 1);
-    argv += (bu_optind - 1);
-
-    if (nflag) {
-    bu_vls_printf(gedp->ged_result_str, "{");
-    for (i = 1; i < argc; i++)
-        bu_vls_printf(gedp->ged_result_str, "%s ", argv[i]);
-    bu_vls_printf(gedp->ged_result_str, "} {}");
-
-    return GED_OK;
-    }
-
-    for (i = 1; i < argc; i++) {
-    if ((dp = db_lookup(gedp->ged_wdbp->dbip,  argv[i], verbose)) != RT_DIR_NULL) {
-        if (!force && dp->d_major_type == DB5_MAJORTYPE_ATTRIBUTE_ONLY && dp->d_minor_type == 0) {
-        bu_vls_printf(gedp->ged_result_str, "You attempted to delete the _GLOBAL object.\n");
-        bu_vls_printf(gedp->ged_result_str, "\tIf you delete the \"_GLOBAL\" object you will be losing some important information\n");
-        bu_vls_printf(gedp->ged_result_str, "\tsuch as your preferred units and the title of the database.\n");
-        bu_vls_printf(gedp->ged_result_str, "\tUse the \"-f\" option, if you really want to do this.\n");
-        continue;
-        }
-
-        is_phony = (dp->d_addr == RT_DIR_PHONY_ADDR);
-
-        /* don't worry about phony objects */
-        if (is_phony)
-        continue;
-
-        _dl_eraseAllNamesFromDisplay(gedp->ged_gdp->gd_headDisplay, gedp->ged_wdbp->dbip, gedp->ged_free_vlist_callback, argv[i], 0, gedp->freesolid);
-
-        if (db_delete(gedp->ged_wdbp->dbip, dp) != 0 || db_dirdelete(gedp->ged_wdbp->dbip, dp) != 0) {
-        /* Abort kill processing on first error */
-        bu_vls_printf(gedp->ged_result_str, "an error occurred while deleting %s", argv[i]);
-        return GED_ERROR;
-        }
-    }
-    }
+    /* Finds a vertex with coordinates given on CLI. Searches on vertexuses
+     * that are contained in a shell.
+     */
+    found = 0;
+    curr_r = r;
+    curr_s = s;
+    do {
+        do {
+            curr_vu = curr_s->vu_p;
+            do {
+                if ( curr_vu ) {
+                    if ( curr_vu->v_p ) {
+                        /* assumes struct vertex has geom coord */
+                        curr_vg = curr_vu->v_p->vg_p;
+                        if ( curr_vg->coord[0] == v[0] && curr_vg->coord[1] == v[1]
+                           && curr_vg->coord[2] == v[2] ) {
+                            found = 1;
+                            break; /* found vertex geom */
+                        }
+                    }
+                }
+            } while ((curr_vu = BU_LIST_PNEXT(vertexuse, curr_vu))
+                    != (struct vertexuse*)&curr_vu->);
+        } while ((curr_s = BU_LIST_PNEXT(shell, curr_s))
+                != (struct shell*)&curr_r->s_hd);
+        if (found) break;
+    } while ((curr_r = BU_LIST_PNEXT(nmgregion, curr_r))
+            != (struct nmgregion*)&m->r_hd);
 #endif
+
+    if ( !found ) {
+        bu_vls_printf(gedp->ged_result_str, "Vertex not found.");
+        return GED_HELP;
+    }
 
     return GED_OK;
 }
 
-/* Usage:  labelvert solid(s) */
-int
-labelvert(struct ged * gedp, char* obj)
-{
-    struct display_list *gdlp;
-    struct display_list *next_gdlp;
-    int i;
-    struct bn_vlblock*vbp;
-    struct directory *dp;
-    mat_t mat;
-    fastf_t scale;
-    struct solid *s;
-
-    vbp = rt_vlblock_init();
-    MAT_IDN(mat);
-    bn_mat_inv(mat, view_state->vs_gvp->gv_rotation);
-    scale = view_state->vs_gvp->gv_size / 100;      /* divide by # chars/screen */
-
-    /* Find uses of this solid in the solid table */
-    gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
-    while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
-            next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
-
-            FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
-            if (db_full_path_search(&s->s_fullpath, dp)) {
-                rt_label_vlist_verts(vbp, &s->s_vlist, mat, scale, base2local);
-            }
-        }
-
-        gdlp = next_gdlp;
-    }
-
-#if 0
-    cvt_vlblock_to_solids(vbp, "_LABELVERT_", 0);
-#endif
-
-    bn_vlblock_free(vbp);
-
-#if 0
-    update_views = 1;
-#endif
-}
 
 
 /*
