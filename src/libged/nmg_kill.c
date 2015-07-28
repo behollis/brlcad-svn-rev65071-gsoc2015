@@ -39,15 +39,18 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
     struct directory *dp;
     struct model* m;
     const char* name;
-    struct nmgregion* r;
-    struct shell* s;
     point_t v;
     struct nmgregion* curr_r;
     struct shell* curr_s;
     struct vertex_g* curr_vg;
     struct vertexuse* curr_vu;
-    int idx;
+    struct edgeuse* curr_eu;
     int found;
+#if 0
+    struct loopuse* curr_lu;
+    struct bn_tol t;
+    BN_TOL_INIT(&t)
+#endif
 
     static const char *usage = "kill V coords";
 
@@ -61,8 +64,8 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
 
     /* must be wanting help */
     if (argc < 6) {
-    bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
-    return GED_HELP;
+        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+        return GED_HELP;
     }
 
     /* attempt to resolve and verify */
@@ -90,41 +93,59 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
 
     m = (struct model *)internal.idb_ptr;
     NMG_CK_MODEL(m);
-    r = BU_LIST_FIRST(nmgregion, &m->r_hd);
-    NMG_CK_REGION(r);
-    s = BU_LIST_FIRST(shell, &r->s_hd);
-    NMG_CK_SHELL(s);
 
-#if 0
-    /* Finds a vertex with coordinates given on CLI. Searches on vertexuses
-     * that are contained in a shell.
+    curr_r = BU_LIST_FIRST(nmgregion, &m->r_hd);
+    NMG_CK_REGION(curr_r);
+    curr_s = BU_LIST_FIRST(shell, &curr_r->s_hd);
+    NMG_CK_SHELL(curr_s);
+
+    /* Finds a vertex with coordinates given on CLI. Traverses all parent
+     * regions and shells. Checks all edgeuses for the vertex structure.
      */
     found = 0;
-    curr_r = r;
-    curr_s = s;
-    do {
-        do {
+    do { /* traverse a region */
+        do { /* traverse a shell */
+
+            /* check the vertexuse for the current shell */
             curr_vu = curr_s->vu_p;
-            do {
+            if ( curr_vu ) {
+                if ( curr_vu->v_p ) {
+                    /* assumes struct vertex has geom coord */
+                    curr_vg = curr_vu->v_p->vg_p;
+
+                    if ( VNEAR_EQUAL(curr_vg->coord, v, BN_TOL_DIST) ) {
+                        nmg_kvu(curr_vu);
+                        found = 1;
+                    }
+                }
+            }
+
+            curr_eu = BU_LIST_FIRST(edgeuse, &curr_s->eu_hd);
+
+            NMG_CK_EDGEUSE(curr_eu);
+            NMG_TEST_EDGEUSE(curr_eu);
+
+            /* traverse the edgeuses for the current shell */
+            do { /* traverse an edgeuse */
+                curr_vu = curr_eu->vu_p;
+                NMG_CK_VERTEXUSE(curr_vu);
                 if ( curr_vu ) {
                     if ( curr_vu->v_p ) {
                         /* assumes struct vertex has geom coord */
                         curr_vg = curr_vu->v_p->vg_p;
-                        if ( curr_vg->coord[0] == v[0] && curr_vg->coord[1] == v[1]
-                           && curr_vg->coord[2] == v[2] ) {
+                        if ( VNEAR_EQUAL(curr_vg->coord, v, BN_TOL_DIST) ) {
+                            nmg_kvu(curr_vu);
                             found = 1;
-                            break; /* found vertex geom */
                         }
                     }
                 }
-            } while ((curr_vu = BU_LIST_PNEXT(vertexuse, curr_vu))
-                    != (struct vertexuse*)&curr_vu->);
-        } while ((curr_s = BU_LIST_PNEXT(shell, curr_s))
-                != (struct shell*)&curr_r->s_hd);
-        if (found) break;
-    } while ((curr_r = BU_LIST_PNEXT(nmgregion, curr_r))
-            != (struct nmgregion*)&m->r_hd);
-#endif
+            } while ( (curr_eu = BU_LIST_PNEXT(edgeuse, curr_eu))
+                    != (struct edgeuse*)&curr_s->eu_hd );
+
+        } while ( (curr_s = BU_LIST_PNEXT(shell, curr_s))
+                != (struct shell*)&curr_r->s_hd );
+    } while ( (curr_r = BU_LIST_PNEXT(nmgregion, curr_r))
+            != (struct nmgregion*)&m->r_hd );
 
     if ( !found ) {
         bu_vls_printf(gedp->ged_result_str, "Vertex not found.");
