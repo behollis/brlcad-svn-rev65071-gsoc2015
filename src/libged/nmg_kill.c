@@ -95,6 +95,7 @@ void remove_vertex(const struct model* m, point_t rv)
                             NMG_CK_VERTEX_G(v->vg_p);
                             if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                                 nmg_kvu(vu);
+                                vu = (struct vertexuse *)NULL;
                             }
                         }
 
@@ -126,6 +127,7 @@ void remove_vertex(const struct model* m, point_t rv)
                             NMG_CK_VERTEX_G(v->vg_p);
                             if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                                 nmg_kvu(vu);
+                                vu = (struct vertexuse *)NULL;
                             }
                         }
                     }
@@ -153,6 +155,7 @@ void remove_vertex(const struct model* m, point_t rv)
                         NMG_CK_VERTEX_G(v->vg_p);
                         if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                             nmg_kvu(vu);
+                            vu = (struct vertexuse *)NULL;
                         }
                     }
                     continue;
@@ -180,6 +183,7 @@ void remove_vertex(const struct model* m, point_t rv)
                         NMG_CK_VERTEX_G(v->vg_p);
                         if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                             nmg_kvu(vu);
+                            vu = (struct vertexuse *)NULL;
                         }
                     }
                 }
@@ -211,6 +215,7 @@ void remove_vertex(const struct model* m, point_t rv)
                     NMG_CK_VERTEX_G(v->vg_p);
                     if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                         nmg_kvu(vu);
+                        vu = (struct vertexuse *)NULL;
                     }
                 }
             }
@@ -228,6 +233,7 @@ void remove_vertex(const struct model* m, point_t rv)
                     NMG_CK_VERTEX_G(v->vg_p);
                     if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                         nmg_kvu(vu);
+                        vu = (struct vertexuse *)NULL;
                     }
                 }
             }
@@ -248,6 +254,7 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
     struct vertex_g* curr_vg;
     struct vertexuse* curr_vu;
     struct edgeuse* curr_eu;
+    struct bn_tol tol;
 
     static const char *usage = "kill V coords";
 
@@ -292,6 +299,16 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
     NMG_CK_MODEL(m);
 
     remove_vertex(m, vt);
+
+#if 0
+    if ( wdb_put_internal(gedp->ged_wdbp, name, &internal, 1.0) < 0 ) {
+        bu_vls_printf(gedp->ged_result_str, "wdb_put_internal(%s)", argv[1]);
+        rt_db_free_internal(&internal);
+        return GED_ERROR;
+    }
+#endif
+
+    rt_db_free_internal(&internal);
 
     return GED_OK;
 }
