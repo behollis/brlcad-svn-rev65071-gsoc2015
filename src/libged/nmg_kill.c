@@ -137,6 +137,7 @@ void remove_vertex(const struct model* m, point_t rv)
                             if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                                 nmg_kvu(vu);
                                 nmg_keu(eu);
+                                nmg_klu(lu);
                             }
                         }
                     }
@@ -193,6 +194,7 @@ void remove_vertex(const struct model* m, point_t rv)
                         if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
                             nmg_kvu(vu);
                             nmg_keu(eu);
+                            nmg_klu(lu);
                         }
                     }
                 }
@@ -266,7 +268,7 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
     struct edgeuse* curr_eu;
     struct bn_tol tol;
 
-    static const char *usage = "kill V coords";
+    static const char *usage = "kill V x y z";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_DRAWABLE(gedp, GED_ERROR);
