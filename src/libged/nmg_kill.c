@@ -261,12 +261,6 @@ ged_nmg_kill_v(struct ged* gedp, int argc, const char* argv[])
     struct model* m;
     const char* name;
     point_t vt;
-    struct nmgregion* curr_r;
-    struct shell* curr_s;
-    struct vertex_g* curr_vg;
-    struct vertexuse* curr_vu;
-    struct edgeuse* curr_eu;
-    struct bn_tol tol;
 
     static const char *usage = "kill V x y z";
 
