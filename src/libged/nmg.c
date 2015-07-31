@@ -58,6 +58,11 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
                 "manifold face in the first encountered shell of the NMG "
                 "object. Vertices are listed as the suffix and define the "
                 "winding-order of the face.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tkill V         -  removes the "
+            "vertexuse and vertex geometry of the selected vertex (via its "
+            "coordinates) and higher-order topology containing the vertex. "
+            "When specifying vertex to be removed, user generally will display "
+            "vertex coordinates in object via the MGED command labelvert.\n");
     return GED_HELP;
     }
 

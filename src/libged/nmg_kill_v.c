@@ -1,4 +1,4 @@
-/*                         N M G _ K I L L . C
+/*                         N M G _ K I L L _ V. C
  * BRL-CAD
  *
  * Copyright (c) 2015 United States Government as represented by
@@ -17,7 +17,7 @@
  * License along with this file; see the file named COPYING for more
  * information.
  */
-/** @file libged/nmg_kill.c
+/** @file libged/nmg_kill_v.c
  *
  * The kill V subcommand for nmg top-level command.
  *
@@ -134,7 +134,8 @@ void remove_vertex(const struct model* m, point_t rv)
                         if (v->vg_p) {
                             NMG_CK_VERTEX_G(v->vg_p);
 
-                            if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
+                            if ( VNEAR_EQUAL(v->vg_p->coord,
+                                 rv, BN_TOL_DIST) ) {
                                 nmg_kvu(vu);
                                 nmg_keu(eu);
                                 nmg_klu(lu);
