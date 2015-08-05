@@ -134,6 +134,60 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return TCL_OK;
 }
 
+/* Usage:  labelface solid(s) */
+int
+f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const char *argv[])
+{
+    struct display_list *gdlp;
+    struct display_list *next_gdlp;
+    int i;
+    struct bn_vlblock*vbp;
+    struct directory *dp;
+    mat_t mat;
+    fastf_t scale;
+
+    CHECK_DBI_NULL;
+
+    if (argc < 2) {
+    struct bu_vls vls = BU_VLS_INIT_ZERO;
+
+    bu_vls_printf(&vls, "help labelface");
+    Tcl_Eval(interp, bu_vls_addr(&vls));
+    bu_vls_free(&vls);
+    return TCL_ERROR;
+    }
+
+    vbp = rt_vlblock_init();
+    MAT_IDN(mat);
+    bn_mat_inv(mat, view_state->vs_gvp->gv_rotation);
+    scale = view_state->vs_gvp->gv_size / 100;      /* divide by # chars/screen */
+
+    for (i=1; i<argc; i++) {
+    struct solid *s;
+    if ((dp = db_lookup(dbip, argv[i], LOOKUP_NOISY)) == RT_DIR_NULL)
+        continue;
+    /* Find uses of this solid in the solid table */
+    gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
+    while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
+        next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
+
+        FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
+        if (db_full_path_search(&s->s_fullpath, dp)) {
+            rt_label_vlist_faces(vbp, &s->s_vlist, mat, scale, base2local);
+        }
+        }
+
+        gdlp = next_gdlp;
+    }
+    }
+
+    cvt_vlblock_to_solids(vbp, "_LABELVERT_", 0);
+
+    bn_vlblock_free(vbp);
+    update_views = 1;
+    return TCL_OK;
+}
+
 
 /*
  * Local Variables:

@@ -507,6 +507,27 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
     }
 }
 
+void
+rt_label_vlist_faces(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, double sz, double mm2local)
+{
+    struct bn_vlist *vp;
+    struct bu_list *vhead;
+    char label[256];
+
+    vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
+
+    for (BU_LIST_FOR(vp, bn_vlist, src)) {
+    register int i;
+    register int nused = vp->nused;
+    register int *cmd = vp->cmd;
+    register point_t *pt = vp->pt;
+    for (i = 0; i < nused; i++, cmd++, pt++) {
+        sprintf(label, " %g", (*pt)[0]*mm2local);
+        bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
+    }
+    }
+}
+
 
 /*
  * Local Variables:
