@@ -483,7 +483,6 @@ rt_uplot_to_vlist(struct bn_vlblock *vbp, register FILE *fp, double char_size, i
     return 0;
 }
 
-
 void
 rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, double sz, double mm2local)
 {
@@ -508,8 +507,10 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
 }
 
 void
-rt_label_vlist_faces(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, double sz, double mm2local)
+rt_label_vlist_faces( struct bn_vlblock* UNUSED(vbp), struct faceuse** UNUSED(fu_list),
+                     fastf_t *UNUSED(mat), double UNUSED(sz), double UNUSED(mm2local) )
 {
+#if 0
     struct bn_vlist *vp;
     struct bu_list *vhead;
     char label[256];
@@ -526,6 +527,7 @@ rt_label_vlist_faces(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
         bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
     }
     }
+#endif
 }
 
 

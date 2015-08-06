@@ -134,17 +134,92 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return TCL_OK;
 }
 
+void get_face_list(const struct model* m, struct faceuse** fu_list )
+{
+    struct nmgregion *r;
+    struct shell *s;
+    struct faceuse *fu;
+    struct face *f;
+#if 0
+    struct faceuse *prev_fu = NULL;
+#endif
+    int idx = 0;
+
+    NMG_CK_MODEL(m);
+
+    for (BU_LIST_FOR(r, nmgregion, &m->r_hd)) {
+        NMG_CK_REGION(r);
+
+        if (r->ra_p) {
+            NMG_CK_REGION_A(r->ra_p);
+        }
+
+        for (BU_LIST_FOR(s, shell, &r->s_hd)) {
+            NMG_CK_SHELL(s);
+
+            if (s->sa_p) {
+                NMG_CK_SHELL_A(s->sa_p);
+            }
+
+            /* Faces in shell */
+            for (BU_LIST_FOR(fu, faceuse, &s->fu_hd)) {
+                NMG_CK_FACEUSE(fu);
+                f = fu->f_p;
+                NMG_CK_FACE(f);
+
+                fu_list[idx++] = fu;
+
+                if (f->g.magic_p) switch (*f->g.magic_p) {
+                    case NMG_FACE_G_PLANE_MAGIC:
+                        break;
+                    case NMG_FACE_G_SNURB_MAGIC:
+                        break;
+                }
+            }
+        }
+    }
+}
+
 /* Usage:  labelface solid(s) */
 int
 f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const char *argv[])
 {
+    struct rt_db_internal internal;
+    struct directory *dp;
     struct display_list *gdlp;
     struct display_list *next_gdlp;
     int i;
     struct bn_vlblock*vbp;
-    struct directory *dp;
     mat_t mat;
     fastf_t scale;
+    struct model* m;
+    const char* name;
+    struct faceuse* fu_list[50] = {0};
+
+
+    /* attempt to resolve and verify */
+    name = argv[1];
+
+    if ( (dp=db_lookup(gedp->ged_wdbp->dbip, name, LOOKUP_QUIET))
+        == RT_DIR_NULL ) {
+        bu_vls_printf(gedp->ged_result_str, "%s does not exist\n", name);
+        return GED_ERROR;
+    }
+
+    if (rt_db_get_internal(&internal, dp, gedp->ged_wdbp->dbip,
+        bn_mat_identity, &rt_uniresource) < 0) {
+        bu_vls_printf(gedp->ged_result_str, "rt_db_get_internal() error\n");
+        return GED_ERROR;
+    }
+
+    if (internal.idb_type != ID_NMG) {
+        bu_vls_printf(gedp->ged_result_str, "%s is not an NMG solid\n", name);
+        rt_db_free_internal(&internal);
+        return GED_ERROR;
+    }
+
+    m = (struct model *)internal.idb_ptr;
+    NMG_CK_MODEL(m);
 
     CHECK_DBI_NULL;
 
@@ -173,7 +248,8 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
 
         FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
         if (db_full_path_search(&s->s_fullpath, dp)) {
-            rt_label_vlist_faces(vbp, &s->s_vlist, mat, scale, base2local);
+            get_face_list(m, &fu_list[0]);
+            rt_label_vlist_faces(vbp, &fu_list[0], mat, scale, base2local);
         }
         }
 
@@ -181,7 +257,7 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     }
     }
 
-    cvt_vlblock_to_solids(vbp, "_LABELVERT_", 0);
+    cvt_vlblock_to_solids(vbp, "_LABELFACE_", 0);
 
     bn_vlblock_free(vbp);
     update_views = 1;
