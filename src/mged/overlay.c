@@ -187,7 +187,9 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     struct rt_db_internal internal;
     struct directory *dp;
     struct display_list *gdlp;
+#if 0
     struct display_list *next_gdlp;
+#endif
     int i;
     struct bn_vlblock*vbp;
     mat_t mat;
@@ -244,7 +246,9 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     /* Find uses of this solid in the solid table */
     gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
     while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
+#if 0
         next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
+#endif
 
         FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
         if (db_full_path_search(&s->s_fullpath, dp)) {
@@ -253,7 +257,10 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
         }
         }
 
+        break;
+#if 0
         gdlp = next_gdlp;
+#endif
     }
     }
 
