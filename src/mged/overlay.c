@@ -184,11 +184,9 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     struct rt_db_internal internal;
     struct directory *dp;
     struct display_list *gdlp;
-#if 0
     struct display_list *next_gdlp;
-#endif
     int i;
-    struct bn_vlblock*vbp;
+    struct bn_vlblock *vbp;
     mat_t mat;
     fastf_t scale;
     struct model* m;
@@ -237,28 +235,23 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     scale = view_state->vs_gvp->gv_size / 100;      /* divide by # chars/screen */
 
     for (i=1; i<argc; i++) {
-    struct solid *s;
-    if ((dp = db_lookup(dbip, argv[i], LOOKUP_NOISY)) == RT_DIR_NULL)
-        continue;
-    /* Find uses of this solid in the solid table */
-    gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
-    while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
-#if 0
-        next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
-#endif
+        struct solid *s;
+        if ((dp = db_lookup(dbip, argv[i], LOOKUP_NOISY)) == RT_DIR_NULL)
+            continue;
 
-        FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
-        if (db_full_path_search(&s->s_fullpath, dp)) {
-            get_face_list(m, &f_list[0]);
-            rt_label_vlist_faces(vbp, &f_list[0], mat, scale, base2local);
-        }
-        }
+        /* Find uses of this solid in the solid table */
+        gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
+        while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
+            next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
+            FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
+                if (db_full_path_search(&s->s_fullpath, dp)) {
+                    get_face_list(m, &f_list[0]);
+                    rt_label_vlist_faces(vbp, &f_list[0], mat, scale, base2local);
+                }
+            }
 
-        break;
-#if 0
-        gdlp = next_gdlp;
-#endif
-    }
+            gdlp = next_gdlp;
+        }
     }
 
     cvt_vlblock_to_solids(vbp, "_LABELFACE_", 0);

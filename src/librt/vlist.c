@@ -514,18 +514,20 @@ rt_label_vlist_faces(struct bn_vlblock* vbp, struct face** f_list,
     struct bu_list *vhead;
     char label[256];
     int idx;
+    point_t avg_pt;
 
     vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
 
     for ( idx = 0; idx < 12; idx++ ) {
-        register point_t *pt;
         if ( &f_list[idx]->min_pt ) {
-            pt = &(f_list[idx]->min_pt);
+            avg_pt[0] = (f_list[idx]->min_pt[0] + f_list[idx]->max_pt[0]) / 2;
+            avg_pt[1] = (f_list[idx]->min_pt[1] + f_list[idx]->max_pt[1]) / 2;
+            avg_pt[2] = (f_list[idx]->min_pt[2] + f_list[idx]->max_pt[2]) / 2;
         }
 
         if ( f_list[idx] ) {
             sprintf(label, " %d", (int)f_list[idx]->index );
-            bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
+            bn_vlist_3string(vhead, vbp->free_vlist_hd, label, avg_pt, mat, sz);
         }
     }
 }
