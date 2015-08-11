@@ -507,20 +507,17 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
 }
 
 void
-rt_label_vlist_faces(struct bn_vlblock* UNUSED(vbp), struct faceuse** fu_list,
-                     fastf_t *UNUSED(mat), double UNUSED(sz), double UNUSED(mm2local) )
+rt_label_vlist_faces(struct bn_vlblock* vbp, struct faceuse** fu_list,
+                     fastf_t *mat, double sz, double UNUSED(mm2local) )
 {
-#if 0
-    struct bn_vlist *vp;
+    /* struct bn_vlist *vp; */
     struct bu_list *vhead;
-#endif
     char label[256];
     int idx;
-#if 0
-    vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
-#endif
 
-    for ( idx = 0; idx < 50; idx++ ) {
+    vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
+
+    for ( idx = 0; idx < 10; idx++ ) {
 #if 0
         register int i;
         register int nused = vp->nused;
@@ -528,13 +525,15 @@ rt_label_vlist_faces(struct bn_vlblock* UNUSED(vbp), struct faceuse** fu_list,
 
 
         for (i = 0; i < nused; i++, cmd++, pt++) {
-        register point_t *pt = vp->pt;
 #endif
+        register point_t *pt;
+        if ( &fu_list[idx]->f_p->min_pt ) {
+            pt = &(fu_list[idx]->f_p->min_pt);
+        }
+
         if (fu_list[idx]) {
             sprintf(label, " %d", (int)fu_list[idx]->index );
-#if 0
             bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
-#endif
         }
     }
 }
