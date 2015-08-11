@@ -507,7 +507,7 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
 }
 
 void
-rt_label_vlist_faces(struct bn_vlblock* vbp, struct faceuse** fu_list,
+rt_label_vlist_faces(struct bn_vlblock* vbp, struct face** f_list,
                      fastf_t *mat, double sz, double UNUSED(mm2local) )
 {
     /* struct bn_vlist *vp; */
@@ -517,22 +517,14 @@ rt_label_vlist_faces(struct bn_vlblock* vbp, struct faceuse** fu_list,
 
     vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
 
-    for ( idx = 0; idx < 10; idx++ ) {
-#if 0
-        register int i;
-        register int nused = vp->nused;
-        register int *cmd = vp->cmd;
-
-
-        for (i = 0; i < nused; i++, cmd++, pt++) {
-#endif
+    for ( idx = 0; idx < 12; idx++ ) {
         register point_t *pt;
-        if ( &fu_list[idx]->f_p->min_pt ) {
-            pt = &(fu_list[idx]->f_p->min_pt);
+        if ( &f_list[idx]->min_pt ) {
+            pt = &(f_list[idx]->min_pt);
         }
 
-        if (fu_list[idx]) {
-            sprintf(label, " %d", (int)fu_list[idx]->index );
+        if ( f_list[idx] ) {
+            sprintf(label, " %d", (int)f_list[idx]->index );
             bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
         }
     }

@@ -134,15 +134,12 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return TCL_OK;
 }
 
-void get_face_list(const struct model* m, struct faceuse** fu_list )
+void get_face_list(const struct model* m, struct face** f_list )
 {
     struct nmgregion *r;
     struct shell *s;
     struct faceuse *fu;
     struct face *f;
-#if 0
-    struct faceuse *prev_fu = NULL;
-#endif
     int idx = 0;
 
     NMG_CK_MODEL(m);
@@ -167,7 +164,7 @@ void get_face_list(const struct model* m, struct faceuse** fu_list )
                 f = fu->f_p;
                 NMG_CK_FACE(f);
 
-                fu_list[idx++] = fu;
+                f_list[idx++] = f;
 
                 if (f->g.magic_p) switch (*f->g.magic_p) {
                     case NMG_FACE_G_PLANE_MAGIC:
@@ -196,7 +193,7 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     fastf_t scale;
     struct model* m;
     const char* name;
-    struct faceuse* fu_list[50] = {0};
+    struct face* f_list[50] = {0};
 
 
     /* attempt to resolve and verify */
@@ -252,8 +249,8 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
 
         FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
         if (db_full_path_search(&s->s_fullpath, dp)) {
-            get_face_list(m, &fu_list[0]);
-            rt_label_vlist_faces(vbp, &fu_list[0], mat, scale, base2local);
+            get_face_list(m, &f_list[0]);
+            rt_label_vlist_faces(vbp, &f_list[0], mat, scale, base2local);
         }
         }
 

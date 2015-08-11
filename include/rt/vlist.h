@@ -97,7 +97,7 @@ RT_EXPORT extern void rt_label_vlist_verts(struct bn_vlblock *vbp,
  * Used by MGED's "labelface" command.
  */
 RT_EXPORT extern void rt_label_vlist_faces(struct bn_vlblock *vbp,
-                                           struct faceuse** fu_list,
+                                           struct face** f_list,
                                            mat_t mat,
                                            double sz,
                                            double mm2local);
