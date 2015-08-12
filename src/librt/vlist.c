@@ -507,7 +507,7 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
 }
 
 void
-rt_label_vlist_faces(struct bn_vlblock* vbp, struct face* f_list,
+rt_label_vlist_faces(struct bn_vlblock* vbp, struct bu_list* f_list,
                      fastf_t *mat, double sz, double UNUSED(mm2local) )
 {
     struct bu_list* vhead;
@@ -517,7 +517,7 @@ rt_label_vlist_faces(struct bn_vlblock* vbp, struct face* f_list,
 
     vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
 
-    for( BU_LIST_FOR(curr_f, face, &f_list->l) ) {
+    for( BU_LIST_FOR(curr_f, face, f_list) ) {
         avg_pt[0] = (curr_f->min_pt[0] + curr_f->max_pt[0]) / 2;
         avg_pt[1] = (curr_f->min_pt[1] + curr_f->max_pt[1]) / 2;
         avg_pt[2] = (curr_f->min_pt[2] + curr_f->max_pt[2]) / 2;

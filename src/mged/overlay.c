@@ -134,16 +134,14 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return TCL_OK;
 }
 
-void get_face_list(const struct model* m, struct face* f_list )
+void get_face_list( const struct model* m, struct bu_list* f_list )
 {
     struct nmgregion *r;
     struct shell *s;
     struct faceuse *fu;
     struct face *f;
-#if 0
-    struct face *tail;
-    int idx = 0;
-#endif
+    struct face* curr_f;
+    int found;
 
     NMG_CK_MODEL(m);
 
@@ -166,16 +164,18 @@ void get_face_list(const struct model* m, struct face* f_list )
                 NMG_CK_FACEUSE(fu);
                 f = fu->f_p;
                 NMG_CK_FACE(f);
-#if 0
-                f_list[idx++] = f;
 
-                if ( BU_LIST_IS_EMPTY(f_list) ) {
-                    BU_LIST_APPEND(f_list, &f->l);
-                } else {
-                    BU_LIST_APPEND(&tail->l, &f->l);
+                found = 0;
+                /* check for duplicate face struct */
+                for (BU_LIST_FOR(curr_f, face, f_list)) {
+                    if (curr_f->index == f->index) {
+                        found = 1;
+                        break;
+                    }
                 }
-#endif
-                BU_LIST_INSERT(&f_list->l, &f->l);
+
+                if ( !found )
+                    BU_LIST_INSERT( f_list, &(f->l) );
 
                 if (f->g.magic_p) switch (*f->g.magic_p) {
                     case NMG_FACE_G_PLANE_MAGIC:
@@ -183,9 +183,7 @@ void get_face_list(const struct model* m, struct face* f_list )
                     case NMG_FACE_G_SNURB_MAGIC:
                         break;
                 }
-#if 0
-                tail = f;
-#endif
+
             }
         }
     }
@@ -205,12 +203,9 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     fastf_t scale;
     struct model* m;
     const char* name;
-#if 0
-    struct face* f_list[50] = {0};
-#endif
+    struct bu_list f_list;
 
-    struct face f_list;
-    BU_LIST_INIT(&(f_list.l));
+    BU_LIST_INIT( &f_list );
 
     /* attempt to resolve and verify */
     name = argv[1];
