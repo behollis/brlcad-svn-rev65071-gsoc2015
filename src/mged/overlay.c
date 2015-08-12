@@ -207,6 +207,17 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
 
     BU_LIST_INIT( &f_list );
 
+    CHECK_DBI_NULL;
+
+    if (argc < 2) {
+        struct bu_vls vls = BU_VLS_INIT_ZERO;
+
+        bu_vls_printf(&vls, "help labelface");
+        Tcl_Eval(interp, bu_vls_addr(&vls));
+        bu_vls_free(&vls);
+        return TCL_ERROR;
+    }
+
     /* attempt to resolve and verify */
     name = argv[1];
 
