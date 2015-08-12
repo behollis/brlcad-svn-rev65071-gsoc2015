@@ -242,17 +242,6 @@ f_labelface(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     m = (struct model *)internal.idb_ptr;
     NMG_CK_MODEL(m);
 
-    CHECK_DBI_NULL;
-
-    if (argc < 2) {
-    struct bu_vls vls = BU_VLS_INIT_ZERO;
-
-    bu_vls_printf(&vls, "help labelface");
-    Tcl_Eval(interp, bu_vls_addr(&vls));
-    bu_vls_free(&vls);
-    return TCL_ERROR;
-    }
-
     vbp = rt_vlblock_init();
     MAT_IDN(mat);
     bn_mat_inv(mat, view_state->vs_gvp->gv_rotation);
