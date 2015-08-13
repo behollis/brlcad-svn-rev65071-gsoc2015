@@ -32,230 +32,45 @@
 
 #include "./ged_private.h"
 
-void remove_face(const struct model* UNUSED(m), int UNUSED(fid))
+void remove_face(const struct model* m, long int fid)
 {
-#if 0
     struct nmgregion *r;
     struct shell *s;
     struct faceuse *fu;
     struct face *f;
-    struct loopuse *lu;
-    struct loop *l;
-    struct edgeuse *eu;
-    struct edge *e;
-    struct vertexuse *vu;
-    struct vertex *v;
 
     NMG_CK_MODEL(m);
 
-    /* Traverse NMG model and remove instances of vertexuses.
-     * In addition to vertex being removed, associated faceuses, loopuses
-     * and edgeuses need to be removed that contained the deleted vertexuse.
-     */
-
     for (BU_LIST_FOR(r, nmgregion, &m->r_hd)) {
-        NMG_CK_REGION(r);
+       NMG_CK_REGION(r);
 
-        if (r->ra_p) {
-            NMG_CK_REGION_A(r->ra_p);
-        }
+       if (r->ra_p) {
+           NMG_CK_REGION_A(r->ra_p);
+       }
 
-        for (BU_LIST_FOR(s, shell, &r->s_hd)) {
-            NMG_CK_SHELL(s);
+       for (BU_LIST_FOR(s, shell, &r->s_hd)) {
+           NMG_CK_SHELL(s);
 
-            if (s->sa_p) {
-                NMG_CK_SHELL_A(s->sa_p);
-            }
+           if (s->sa_p) {
+               NMG_CK_SHELL_A(s->sa_p);
+           }
 
-            /* Faces in shell */
-            for (BU_LIST_FOR(fu, faceuse, &s->fu_hd)) {
-                NMG_CK_FACEUSE(fu);
-                f = fu->f_p;
-                NMG_CK_FACE(f);
+           /* Faces in shell */
+           for (BU_LIST_FOR(fu, faceuse, &s->fu_hd)) {
+               NMG_CK_FACEUSE(fu);
+               f = fu->f_p;
+               NMG_CK_FACE(f);
 
-                if (f->g.magic_p) switch (*f->g.magic_p) {
-                    case NMG_FACE_G_PLANE_MAGIC:
-                        break;
-                    case NMG_FACE_G_SNURB_MAGIC:
-                        break;
-                }
-
-                /* Loops in face */
-                for (BU_LIST_FOR(lu, loopuse, &fu->lu_hd)) {
-                    NMG_CK_LOOPUSE(lu);
-                    l = lu->l_p;
-                    NMG_CK_LOOP(l);
-
-                    if (l->lg_p) {
-                        NMG_CK_LOOP_G(l->lg_p);
-                    }
-
-                    if (BU_LIST_FIRST_MAGIC(&lu->down_hd) == NMG_VERTEXUSE_MAGIC) {
-                        /* Loop of Lone vertex */
-                        vu = BU_LIST_FIRST(vertexuse, &lu->down_hd);
-
-                        /* check and remove vertexuse */
-                        NMG_CK_VERTEXUSE(vu);
-                        v = vu->v_p;
-                        NMG_CK_VERTEX(v);
-
-                        if (v->vg_p) {
-                            NMG_CK_VERTEX_G(v->vg_p);
-
-                            if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
-                                nmg_kvu(vu);
-                                nmg_klu(lu);
-                            }
-                        }
-
-                        continue;
-                    }
-
-                    for (BU_LIST_FOR(eu, edgeuse, &lu->down_hd)) {
-                        NMG_CK_EDGEUSE(eu);
-                        e = eu->e_p;
-                        NMG_CK_EDGE(e);
-
-                        if (eu->g.magic_p) {
-                            switch (*eu->g.magic_p) {
-                            case NMG_EDGE_G_LSEG_MAGIC:
-                                break;
-                            case NMG_EDGE_G_CNURB_MAGIC:
-                                break;
-                            }
-                        }
-
-                        vu = eu->vu_p;
-
-                        /* check and remove vertexuse */
-                        NMG_CK_VERTEXUSE(vu);
-                        v = vu->v_p;
-                        NMG_CK_VERTEX(v);
-
-                        if (v->vg_p) {
-                            NMG_CK_VERTEX_G(v->vg_p);
-
-                            if ( VNEAR_EQUAL(v->vg_p->coord,
-                                 rv, BN_TOL_DIST) ) {
-                                nmg_kvu(vu);
-                                nmg_keu(eu);
-                                nmg_klu(lu);
-                            }
-                        }
-                    }
-                }
-            }
-
-            /* Wire loops in shell */
-            for (BU_LIST_FOR(lu, loopuse, &s->lu_hd)) {
-                NMG_CK_LOOPUSE(lu);
-                l = lu->l_p;
-                NMG_CK_LOOP(l);
-
-                if (l->lg_p) {
-                    NMG_CK_LOOP_G(l->lg_p);
-                }
-
-                if (BU_LIST_FIRST_MAGIC(&lu->down_hd) == NMG_VERTEXUSE_MAGIC) {
-                    /* Wire loop of Lone vertex */
-                    vu = BU_LIST_FIRST(vertexuse, &lu->down_hd);
-                    /* check and remove vertexuse */
-                    NMG_CK_VERTEXUSE(vu);
-                    v = vu->v_p;
-                    NMG_CK_VERTEX(v);
-                    if (v->vg_p) {
-                        NMG_CK_VERTEX_G(v->vg_p);
-                        if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
-                            nmg_kvu(vu);
-                            nmg_klu(lu);
-                        }
-                    }
-                    continue;
-                }
-
-                for (BU_LIST_FOR(eu, edgeuse, &lu->down_hd)) {
-                    NMG_CK_EDGEUSE(eu);
-                    e = eu->e_p;
-                    NMG_CK_EDGE(e);
-
-                    if (eu->g.magic_p) switch (*eu->g.magic_p) {
-                        case NMG_EDGE_G_LSEG_MAGIC:
-                        break;
-                        case NMG_EDGE_G_CNURB_MAGIC:
-                        break;
-                    }
-                    vu = eu->vu_p;
-
-                    /* check and remove vertexuse */
-                    NMG_CK_VERTEXUSE(vu);
-                    v = vu->v_p;
-                    NMG_CK_VERTEX(v);
-
-                    if (v->vg_p) {
-                        NMG_CK_VERTEX_G(v->vg_p);
-                        if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
-                            nmg_kvu(vu);
-                            nmg_keu(eu);
-                            nmg_klu(lu);
-                        }
-                    }
-                }
-            }
-
-            /* Wire edges in shell */
-            for (BU_LIST_FOR(eu, edgeuse, &s->eu_hd)) {
-                NMG_CK_EDGEUSE(eu);
-                e = eu->e_p;
-                NMG_CK_EDGE(e);
-
-                if (eu->g.magic_p) {
-                    switch (*eu->g.magic_p) {
-                    case NMG_EDGE_G_LSEG_MAGIC:
-                        break;
-                    case NMG_EDGE_G_CNURB_MAGIC:
-                        break;
-                    }
-                }
-
-                vu = eu->vu_p;
-
-                /* check and remove vertexuse */
-                NMG_CK_VERTEXUSE(vu);
-                v = vu->v_p;
-                NMG_CK_VERTEX(v);
-
-                if (v->vg_p) {
-                    NMG_CK_VERTEX_G(v->vg_p);
-
-                    if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
-                        nmg_kvu(vu);
-                        nmg_keu(eu);
-                    }
-                }
-            }
-
-            /* Lone vertex in shell */
-            vu = s->vu_p;
-
-            if (vu) {
-                /* check and remove vertexuse */
-                NMG_CK_VERTEXUSE(vu);
-                v = vu->v_p;
-                NMG_CK_VERTEX(v);
-
-                if (v->vg_p) {
-                    NMG_CK_VERTEX_G(v->vg_p);
-
-                    if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
-                        nmg_kvu(vu);
-                    }
-                }
-            }
-        }
+               if ( fid == f->index ) {
+                   /* this kills both facesuses using the face,
+                    * and the face itself.
+                    */
+                   nmg_kfu(fu);
+               }
+           }
+       }
     }
-#endif
 }
-
 
 int
 ged_nmg_kill_f(struct ged* gedp, int argc, const char* argv[])
@@ -264,7 +79,7 @@ ged_nmg_kill_f(struct ged* gedp, int argc, const char* argv[])
     struct directory *dp;
     struct model* m;
     const char* name;
-    int fid;
+    long int fid;
 
     static const char *usage = "kill F id";
 
@@ -303,7 +118,8 @@ ged_nmg_kill_f(struct ged* gedp, int argc, const char* argv[])
         return GED_ERROR;
     }
 
-    fid = atoi(argv[3]);
+    /* get face index from command line */
+    fid = (long int)atoi(argv[3]);
 
     m = (struct model *)internal.idb_ptr;
     NMG_CK_MODEL(m);

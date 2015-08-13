@@ -88,7 +88,7 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
         ged_nmg_cmface(gedp, argc, argv);
     }
     else if( BU_STR_EQUAL( "kill", subcmd ) ) {
-        const char* opt = argv[3];
+        const char* opt = argv[2];
         if ( BU_STR_EQUAL( "V", opt ) ) {
             ged_nmg_kill_v(gedp, argc, argv);
         } else if ( BU_STR_EQUAL( "F", opt ) ) {
