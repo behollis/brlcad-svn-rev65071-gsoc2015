@@ -278,7 +278,7 @@ ged_nmg_move_v(struct ged* gedp, int argc, const char* argv[])
     bu_vls_trunc(gedp->ged_result_str, 0);
 
     /* must be wanting help */
-    if (argc < 9) {
+    if (argc != 9 ) {
         bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
         return GED_HELP;
     }
