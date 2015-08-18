@@ -514,14 +514,14 @@ rt_label_vidx_verts(struct bn_vlblock *vbp, struct bu_list *v_list, fastf_t *mat
         double sz, double UNUSED(mm2local))
 {
     struct bu_list* vhead;
-    struct vertex* curr_v;
+    struct vtxlabel* curr_vl;
     char label[256];
 
     vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
 
-    for( BU_LIST_FOR(curr_v, vertex, v_list) ) {
-        sprintf(label, " %d", (int)curr_v->index );
-        bn_vlist_3string(vhead, vbp->free_vlist_hd, label, curr_v->vg_p->coord, mat, sz);
+    for( BU_LIST_FOR(curr_vl, vtxlabel, v_list) ) {
+        sprintf(label, " %lu", curr_vl->index );
+        bn_vlist_3string(vhead, vbp->free_vlist_hd, label, curr_vl->coord, mat, sz);
     }
 }
 

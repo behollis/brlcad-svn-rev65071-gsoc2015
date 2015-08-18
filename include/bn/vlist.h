@@ -156,7 +156,12 @@ struct bn_vlist  {
 BN_EXPORT extern int bn_vlist_cmd_cnt(struct bn_vlist *vlist);
 BN_EXPORT extern int bn_vlist_bbox(struct bn_vlist *vp, point_t *bmin, point_t *bmax);
 
-
+/* Stores vertex info for labelling with NMG index. */
+struct vtxlabel {
+    struct bu_list l;
+    point_t coord;
+    long int index;
+};
 
 /**
  * For plotting, a way of separating plots into separate color vlists:

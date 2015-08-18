@@ -407,7 +407,6 @@ struct mged_hist {
     int mh_status;
 };
 
-
 /* internal variables related to the command window(s) */
 struct cmd_list {
     struct bu_list l;

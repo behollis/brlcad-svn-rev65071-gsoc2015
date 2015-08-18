@@ -28,6 +28,7 @@
 
 #include "vmath.h"
 #include "raytrace.h"
+#include "bn/vlist.h"
 
 #include "./mged.h"
 #include "./sedit.h"
@@ -79,6 +80,21 @@ cmd_overlay(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return ret;
 }
 
+void insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
+
+    /* Copies data from struct vertex and
+     * insert into bu_list of index labels.
+     */
+
+    struct vtxlabel* v_info = (struct vtxlabel*)malloc(sizeof(struct vtxlabel));
+    v_info->coord[0] = vert->vg_p->coord[0];
+    v_info->coord[1] = vert->vg_p->coord[1];
+    v_info->coord[2] = vert->vg_p->coord[2];
+    v_info->index = vert->index;
+
+    BU_LIST_INSERT( v_list, &v_info->l);
+}
+
 void get_vertex_list( const struct model* m, struct bu_list* v_list )
 {
     struct nmgregion *r;
@@ -91,7 +107,7 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
     struct edge *e;
     struct vertexuse *vu;
     struct vertex *v;
-    struct vertex *curr_v;
+    struct vtxlabel *curr_v;
     int found = 0;
 
     NMG_CK_MODEL(m);
@@ -137,25 +153,24 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
                         /* Loop of Lone vertex */
                         vu = BU_LIST_FIRST(vertexuse, &lu->down_hd);
 
-                        /* check and remove vertexuse */
+                        /* check vertexuse */
                         NMG_CK_VERTEXUSE(vu);
                         v = vu->v_p;
                         NMG_CK_VERTEX(v);
 
                         /* check for duplicate vertex struct */
-                        for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                        for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                             if (curr_v->index == v->index) {
                                 found = 1;
                                 break;
                             }
                         }
 
-                        if ( !found )
-                            BU_LIST_INSERT( v_list, &(v->vu_hd) );
+                        if ( !found ) {
+                            insert_index_label( v_list, v );
+                        }
 
                         found = 0;
-
-                        continue;
                     }
 
                     for (BU_LIST_FOR(eu, edgeuse, &lu->down_hd)) {
@@ -174,21 +189,22 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
 
                         vu = eu->vu_p;
 
-                        /* check and remove vertexuse */
+                        /* check vertexuse */
                         NMG_CK_VERTEXUSE(vu);
                         v = vu->v_p;
                         NMG_CK_VERTEX(v);
 
                         /* check for duplicate vertex struct */
-                        for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                        for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                             if (curr_v->index == v->index) {
                                 found = 1;
                                 break;
                             }
                         }
 
-                        if ( !found )
-                            BU_LIST_INSERT( v_list, &(v->vu_hd) );
+                        if ( !found ) {
+                            insert_index_label( v_list, v );
+                        }
 
                         found = 0;
                     }
@@ -214,18 +230,18 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
                     NMG_CK_VERTEX(v);
 
                     /* check for duplicate vertex struct */
-                    for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                    for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                         if (curr_v->index == v->index) {
                             found = 1;
                             break;
                         }
                     }
 
-                    if ( !found )
-                        BU_LIST_INSERT( v_list, &(v->vu_hd) );
+                    if ( !found ) {
+                        insert_index_label( v_list, v );
+                    }
 
                     found = 0;
-                    continue;
                 }
 
                 for (BU_LIST_FOR(eu, edgeuse, &lu->down_hd)) {
@@ -241,21 +257,22 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
                     }
                     vu = eu->vu_p;
 
-                    /* check and remove vertexuse */
+                    /* check vertexuse */
                     NMG_CK_VERTEXUSE(vu);
                     v = vu->v_p;
                     NMG_CK_VERTEX(v);
 
                     /* check for duplicate vertex struct */
-                    for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                    for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                         if (curr_v->index == v->index) {
                             found = 1;
                             break;
                         }
                     }
 
-                    if ( !found )
-                        BU_LIST_INSERT( v_list, &(v->vu_hd) );
+                    if ( !found ) {
+                        insert_index_label( v_list, v );
+                    }
 
                     found = 0;
                 }
@@ -278,47 +295,46 @@ void get_vertex_list( const struct model* m, struct bu_list* v_list )
 
                 vu = eu->vu_p;
 
-                /* check and remove vertexuse */
+                /* check vertexuse */
                 NMG_CK_VERTEXUSE(vu);
                 v = vu->v_p;
                 NMG_CK_VERTEX(v);
 
                 /* check for duplicate vertex struct */
-                for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                     if (curr_v->index == v->index) {
                         found = 1;
                         break;
                     }
                 }
 
-                if ( !found )
-                    BU_LIST_INSERT( v_list, &(v->vu_hd) );
-
-                found = 0;
-
+                if ( !found ) {
+                    insert_index_label( v_list, v );
+                    found = 0;
+                }
             }
 
             /* Lone vertex in shell */
             vu = s->vu_p;
 
             if (vu) {
-                /* check and remove vertexuse */
+                /* check vertexuse */
                 NMG_CK_VERTEXUSE(vu);
                 v = vu->v_p;
                 NMG_CK_VERTEX(v);
 
                 /* check for duplicate vertex struct */
-                for (BU_LIST_FOR(curr_v, vertex, v_list)) {
+                for (BU_LIST_FOR(curr_v, vtxlabel, v_list)) {
                     if (curr_v->index == v->index) {
                         found = 1;
                         break;
                     }
                 }
 
-                if ( !found )
-                    BU_LIST_INSERT( v_list, &(v->vu_hd) );
-
-                found = 0;
+                if ( !found ) {
+                    insert_index_label( v_list, v );
+                    found = 0;
+                }
             }
         }
     }
@@ -336,7 +352,7 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     mat_t mat;
     fastf_t scale;
     char opt[2] = {'c','\0'};
-    int i = 1;
+    int i=1;
     struct bu_list v_list;
     struct model* m;
     const char* name;
@@ -399,28 +415,28 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     bn_mat_inv(mat, view_state->vs_gvp->gv_rotation);
     scale = view_state->vs_gvp->gv_size / 100;		/* divide by # chars/screen */
 
-    for (; i<argc; i++) {
-	struct solid *s;
-	if ((dp = db_lookup(dbip, argv[i], LOOKUP_NOISY)) == RT_DIR_NULL)
-	    continue;
-	/* Find uses of this solid in the solid table */
-	gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
-	while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
-	    next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
+    if ( BU_STR_EQUIV( "i", opt ) ) {
+        get_vertex_list(m, &v_list);
+        rt_label_vidx_verts(vbp, &v_list, mat, scale, base2local);
+    } else {
+        for (; i<argc; i++) {
+        struct solid *s;
+        if ((dp = db_lookup(dbip, argv[i], LOOKUP_NOISY)) == RT_DIR_NULL)
+            continue;
+        /* Find uses of this solid in the solid table */
+        gdlp = BU_LIST_NEXT(display_list, gedp->ged_gdp->gd_headDisplay);
+        while (BU_LIST_NOT_HEAD(gdlp, gedp->ged_gdp->gd_headDisplay)) {
+            next_gdlp = BU_LIST_PNEXT(display_list, gdlp);
 
-	    FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
-		if (db_full_path_search(&s->s_fullpath, dp)) {
-		    if ( BU_STR_EQUIV( "i", opt ) ) {
-		        get_vertex_list(m, &v_list);
-		        rt_label_vidx_verts(vbp, &v_list, mat, scale, base2local);
-		    } else {
-		        rt_label_vlist_verts(vbp, &s->s_vlist, mat, scale, base2local);
-		    }
-		}
-	    }
+            FOR_ALL_SOLIDS(s, &gdlp->dl_headSolid) {
+            if (db_full_path_search(&s->s_fullpath, dp)) {
+                rt_label_vlist_verts(vbp, &s->s_vlist, mat, scale, base2local);
+            }
+            }
 
-	    gdlp = next_gdlp;
-	}
+            gdlp = next_gdlp;
+        }
+        }
     }
 
     cvt_vlblock_to_solids(vbp, "_LABELVERT_", 0);
