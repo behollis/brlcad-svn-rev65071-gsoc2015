@@ -94,6 +94,15 @@ RT_EXPORT extern void rt_label_vlist_verts(struct bn_vlblock *vbp,
                                            double mm2local);
 
 /**
+ * Used by MGED's "labelvert" command for NMG indices.
+ */
+RT_EXPORT extern void rt_label_vidx_verts(struct bn_vlblock *vbp,
+                                           struct bu_list *src,
+                                           mat_t mat,
+                                           double sz,
+                                           double mm2local);
+
+/**
  * Used by MGED's "labelface" command.
  */
 RT_EXPORT extern void rt_label_vlist_faces(struct bn_vlblock *vbp,

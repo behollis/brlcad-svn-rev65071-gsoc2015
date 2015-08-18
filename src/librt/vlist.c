@@ -457,7 +457,6 @@ rt_process_uplot_value(register struct bu_list **vhead,
     return 0;
 }
 
-
 int
 rt_uplot_to_vlist(struct bn_vlblock *vbp, register FILE *fp, double char_size, int mode)
 {
@@ -484,7 +483,8 @@ rt_uplot_to_vlist(struct bn_vlblock *vbp, register FILE *fp, double char_size, i
 }
 
 void
-rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, double sz, double mm2local)
+rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat,
+        double sz, double mm2local)
 {
     struct bn_vlist *vp;
     struct bu_list *vhead;
@@ -493,16 +493,35 @@ rt_label_vlist_verts(struct bn_vlblock *vbp, struct bu_list *src, fastf_t *mat, 
     vhead = bn_vlblock_find(vbp, 255, 255, 255);	/* white */
 
     for (BU_LIST_FOR(vp, bn_vlist, src)) {
-	register int i;
-	register int nused = vp->nused;
-	register int *cmd = vp->cmd;
-	register point_t *pt = vp->pt;
-	for (i = 0; i < nused; i++, cmd++, pt++) {
-	    /* XXX Skip polygon markers? */
-	    sprintf(label, " %g, %g, %g",
-		    (*pt)[0]*mm2local, (*pt)[1]*mm2local, (*pt)[2]*mm2local);
-	    bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
-	}
+        register int i;
+        register int nused = vp->nused;
+        register int *cmd = vp->cmd;
+        register point_t *pt = vp->pt;
+
+        for (i = 0; i < nused; i++, cmd++, pt++) {
+            /* default coordinates label */
+            /* XXX Skip polygon markers? */
+            sprintf(label, " %g, %g, %g",
+                (*pt)[0]*mm2local, (*pt)[1]*mm2local, (*pt)[2]*mm2local);
+
+            bn_vlist_3string(vhead, vbp->free_vlist_hd, label, (*pt), mat, sz);
+        }
+    }
+}
+
+void
+rt_label_vidx_verts(struct bn_vlblock *vbp, struct bu_list *v_list, fastf_t *mat,
+        double sz, double UNUSED(mm2local))
+{
+    struct bu_list* vhead;
+    struct vertex* curr_v;
+    char label[256];
+
+    vhead = bn_vlblock_find(vbp, 255, 255, 255);    /* white */
+
+    for( BU_LIST_FOR(curr_v, vertex, v_list) ) {
+        sprintf(label, " %d", (int)curr_v->index );
+        bn_vlist_3string(vhead, vbp->free_vlist_hd, label, curr_v->vg_p->coord, mat, sz);
     }
 }
 
