@@ -83,7 +83,6 @@ cmd_overlay(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
 void
 insert_index_label( struct bu_list* v_list, struct vertex* vert )
 {
-
     /* Copies data from struct vertex and
      * insert into bu_list of index labels.
      */

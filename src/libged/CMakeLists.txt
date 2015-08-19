@@ -170,6 +170,7 @@ set(LIBGED_SOURCES
   nmg_kill_v.c
   nmg_kill_f.c
   nmg_move_v.c
+  nmg_make_v.c
   ocenter.c
   open.c
   orient.c
