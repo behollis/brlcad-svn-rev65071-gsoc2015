@@ -87,7 +87,8 @@ insert_index_label( struct bu_list* v_list, struct vertex* vert )
      * insert into bu_list of index labels.
      */
 
-    struct vtxlabel* v_info = (struct vtxlabel*)malloc(sizeof(struct vtxlabel));
+    struct vtxlabel* v_info =
+            (struct vtxlabel*)bu_malloc(sizeof(struct vtxlabel), "vtxlabel");
     v_info->coord[0] = vert->vg_p->coord[0];
     v_info->coord[1] = vert->vg_p->coord[1];
     v_info->coord[2] = vert->vg_p->coord[2];
@@ -102,7 +103,7 @@ free_index_label_list( struct bu_list* v_list )
     struct vtxlabel* curr_vl;
     while (BU_LIST_WHILE(curr_vl, vtxlabel, v_list)) {
         BU_LIST_DEQUEUE(&(curr_vl->l));
-        free(curr_vl);
+        bu_free(curr_vl, "vtxlabel");
     }
 }
 
