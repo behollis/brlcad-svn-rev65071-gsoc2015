@@ -80,7 +80,8 @@ cmd_overlay(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return ret;
 }
 
-void insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
+void
+insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
 
     /* Copies data from struct vertex and
      * insert into bu_list of index labels.
@@ -95,7 +96,20 @@ void insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
     BU_LIST_INSERT( v_list, &v_info->l);
 }
 
-void get_vertex_list( const struct model* m, struct bu_list* v_list )
+void
+free_index_label_list( struct bu_list* v_list ) {
+    struct vtxlabel* curr_vl;
+
+    for( BU_LIST_FOR(curr_vl, vtxlabel, v_list) ) {
+        BU_LIST_DEQUEUE(curr_vl);
+        free(curr_vl);
+    }
+
+    free(v_list);
+}
+
+void
+get_vertex_list( const struct model* m, struct bu_list* v_list )
 {
     struct nmgregion *r;
     struct shell *s;
@@ -418,6 +432,7 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     if ( BU_STR_EQUIV( "i", opt ) ) {
         get_vertex_list(m, &v_list);
         rt_label_vidx_verts(vbp, &v_list, mat, scale, base2local);
+        free_index_label_list( &v_list );
     } else {
         for (; i<argc; i++) {
         struct solid *s;
@@ -446,7 +461,8 @@ f_labelvert(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
     return TCL_OK;
 }
 
-void get_face_list( const struct model* m, struct bu_list* f_list )
+void
+get_face_list( const struct model* m, struct bu_list* f_list )
 {
     struct nmgregion *r;
     struct shell *s;
