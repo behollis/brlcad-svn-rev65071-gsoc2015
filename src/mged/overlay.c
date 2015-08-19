@@ -81,7 +81,8 @@ cmd_overlay(ClientData UNUSED(clientData), Tcl_Interp *interp, int argc, const c
 }
 
 void
-insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
+insert_index_label( struct bu_list* v_list, struct vertex* vert )
+{
 
     /* Copies data from struct vertex and
      * insert into bu_list of index labels.
@@ -97,15 +98,13 @@ insert_index_label( struct bu_list* v_list, struct vertex* vert ) {
 }
 
 void
-free_index_label_list( struct bu_list* v_list ) {
+free_index_label_list( struct bu_list* v_list )
+{
     struct vtxlabel* curr_vl;
-
-    for( BU_LIST_FOR(curr_vl, vtxlabel, v_list) ) {
-        BU_LIST_DEQUEUE(curr_vl);
+    while (BU_LIST_WHILE(curr_vl, vtxlabel, v_list)) {
+        BU_LIST_DEQUEUE(&(curr_vl->l));
         free(curr_vl);
     }
-
-    free(v_list);
 }
 
 void
