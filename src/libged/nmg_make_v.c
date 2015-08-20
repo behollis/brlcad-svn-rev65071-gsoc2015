@@ -48,6 +48,8 @@ struct tmp_v {
     struct vertex *v;
 };
 
+extern struct vertexuse* nmg_mvvu(uint32_t *upptr, struct model *m);
+
 int
 ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
 {
@@ -66,8 +68,6 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     struct vertex ***new_verts;
 #endif
 
-
-
     int idx;
     int num_verts;
 
@@ -82,7 +82,7 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     num_verts = (argc - 3) / 3;
 
     /* check for less than three vertices or incomplete vertex coordinates */
-    if (argc < ELEMENTS_PER_POINT * 3 + 2 || (argc - 2) % 3 != 0) {
+    if (argc < ELEMENTS_PER_POINT + 3) {
        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
        return GED_HELP;
     }
@@ -132,16 +132,29 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
 #endif
 
     for (idx=0; idx < num_verts; idx++){
-        struct vertexuse* c_vu;
+        struct vertexuse* vu = NULL;
 
         verts[idx].pt[0] = (fastf_t)atof(argv[idx*3+3]);
         verts[idx].pt[1] = (fastf_t)atof(argv[idx*3+4]);
         verts[idx].pt[2] = (fastf_t)atof(argv[idx*3+5]);
 
-        c_vu = nmg_mvvu(s, m);
+        vu = nmg_mvvu(&s->l.magic, m);
+        NMG_CK_VERTEXUSE(vu);
+        nmg_vertex_gv(vu->v_p, verts[idx].pt);
 
-
-        nmg_vertex_gv(c_vu->v_p, verts[idx].pt);
+        if ( s->vu_p == NULL ) {
+            s->vu_p = vu;
+        } else {
+            struct loopuse* lu = NULL;
+            /* Since we don't know the "orientation" of the vertex,
+             * we specify 0 for space exclusion.
+             */
+            lu = nmg_mlv(&s->l.magic, vu->v_p, 0);
+            NMG_CK_LOOPUSE(lu);
+#if 0
+            BU_LIST_INSERT( &s->lu_hd, &curr_eu->l);
+#endif
+        }
     }
 
     tol.magic = BN_TOL_MAGIC;
@@ -159,8 +172,7 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     }
 
     rt_db_free_internal(&internal);
-
-    /* free verts using bu_free */
+    bu_free(verts, "new verts");
 
     return GED_OK;
 }
