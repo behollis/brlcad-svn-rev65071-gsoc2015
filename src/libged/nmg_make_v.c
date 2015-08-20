@@ -60,19 +60,9 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     struct nmgregion* r;
     struct shell* s;
     struct tmp_v* verts;
-#if 0
-    struct faceuse *fu;
-#endif
     struct bn_tol tol;
-#if 0
-    struct vertex ***new_verts;
-#endif
-
     int idx;
     int num_verts;
-
-
-
     static const char *usage = "make V x0 y0 z0 ... xn yn zn";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
@@ -82,7 +72,7 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     num_verts = (argc - 3) / 3;
 
     /* check for less than three vertices or incomplete vertex coordinates */
-    if (argc < ELEMENTS_PER_POINT + 3) {
+    if (argc < ELEMENTS_PER_POINT + 3 || (argc - 3) % 3 != 0) {
        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
        return GED_HELP;
     }
@@ -122,38 +112,24 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     NMG_CK_REGION(r);
     NMG_CK_SHELL(s);
 
-
     verts = (struct tmp_v *)NULL;
     verts = (struct tmp_v *)bu_calloc(num_verts,
             sizeof(struct tmp_v), "verts");
-#if 0
-    new_verts = (struct vertex ***) bu_calloc( num_verts,
-               sizeof(struct vertex **), "new verts");
-#endif
 
     for (idx=0; idx < num_verts; idx++){
-        struct vertexuse* vu = NULL;
-
         verts[idx].pt[0] = (fastf_t)atof(argv[idx*3+3]);
         verts[idx].pt[1] = (fastf_t)atof(argv[idx*3+4]);
         verts[idx].pt[2] = (fastf_t)atof(argv[idx*3+5]);
 
-        vu = nmg_mvvu(&s->l.magic, m);
-        NMG_CK_VERTEXUSE(vu);
-        nmg_vertex_gv(vu->v_p, verts[idx].pt);
-
         if ( s->vu_p == NULL ) {
+            struct vertexuse* vu = nmg_mvvu(&s->l.magic, m);
+            NMG_CK_VERTEXUSE(vu);
+            nmg_vertex_gv(vu->v_p, verts[idx].pt);
             s->vu_p = vu;
         } else {
-            struct loopuse* lu = NULL;
-            /* Since we don't know the "orientation" of the vertex,
-             * we specify 0 for space exclusion.
-             */
-            lu = nmg_mlv(&s->l.magic, vu->v_p, 0);
-            NMG_CK_LOOPUSE(lu);
-#if 0
-            BU_LIST_INSERT( &s->lu_hd, &curr_eu->l);
-#endif
+            struct shell* ns = nmg_msv(r);
+            NMG_CK_SHELL(ns);
+            nmg_vertex_gv( ns->vu_p->v_p, verts[idx].pt);
         }
     }
 
