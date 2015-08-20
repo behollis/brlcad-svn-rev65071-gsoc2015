@@ -57,14 +57,21 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     const char* name;
     struct nmgregion* r;
     struct shell* s;
-#if 0
     struct tmp_v* verts;
+#if 0
     struct faceuse *fu;
+#endif
     struct bn_tol tol;
-    struct vertex ***face_verts;
+#if 0
+    struct vertex ***new_verts;
+#endif
+
+
+
     int idx;
     int num_verts;
-#endif
+
+
 
     static const char *usage = "make V x0 y0 z0 ... xn yn zn";
 
@@ -72,9 +79,7 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     GED_CHECK_READ_ONLY(gedp, GED_ERROR);
     GED_CHECK_ARGC_GT_0(gedp, argc, GED_ERROR);
 
-#if 0
     num_verts = (argc - 3) / 3;
-#endif
 
     /* check for less than three vertices or incomplete vertex coordinates */
     if (argc < ELEMENTS_PER_POINT * 3 + 2 || (argc - 2) % 3 != 0) {
@@ -117,34 +122,26 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     NMG_CK_REGION(r);
     NMG_CK_SHELL(s);
 
-#if 0
+
     verts = (struct tmp_v *)NULL;
     verts = (struct tmp_v *)bu_calloc(num_verts,
             sizeof(struct tmp_v), "verts");
-    face_verts = (struct vertex ***) bu_calloc( num_verts,
-               sizeof(struct vertex **), "face_verts");
+#if 0
+    new_verts = (struct vertex ***) bu_calloc( num_verts,
+               sizeof(struct vertex **), "new verts");
+#endif
 
     for (idx=0; idx < num_verts; idx++){
+        struct vertexuse* c_vu;
+
         verts[idx].pt[0] = (fastf_t)atof(argv[idx*3+3]);
         verts[idx].pt[1] = (fastf_t)atof(argv[idx*3+4]);
         verts[idx].pt[2] = (fastf_t)atof(argv[idx*3+5]);
-        face_verts[idx] = &verts[idx].v;
-    }
 
-    fu = nmg_cmface( s, face_verts, num_verts );
-    bu_free((char *) face_verts, "face_verts");
+        c_vu = nmg_mvvu(s, m);
 
-    /* assign geometry for entire vertex list (if we have one) */
-    for (idx=0; idx < num_verts; idx++) {
-        if (verts[idx].v) nmg_vertex_gv(verts[idx].v, verts[idx].pt);
-    }
 
-    /* assign face geometry */
-    if (s) {
-        for (BU_LIST_FOR (fu, faceuse, &s->fu_hd)) {
-            if (fu->orientation != OT_SAME) continue;
-            nmg_calc_face_g(fu);
-        }
+        nmg_vertex_gv(c_vu->v_p, verts[idx].pt);
     }
 
     tol.magic = BN_TOL_MAGIC;
@@ -154,7 +151,6 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     tol.para = 1 - tol.perp;
 
     nmg_rebound(m, &tol);
-#endif
 
     if ( wdb_put_internal(gedp->ged_wdbp, name, &internal, 1.0) < 0 ) {
         bu_vls_printf(gedp->ged_result_str, "wdb_put_internal(%s)", argv[1]);
@@ -163,6 +159,8 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
     }
 
     rt_db_free_internal(&internal);
+
+    /* free verts using bu_free */
 
     return GED_OK;
 }
