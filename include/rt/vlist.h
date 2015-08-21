@@ -111,6 +111,12 @@ RT_EXPORT extern void rt_label_vlist_faces(struct bn_vlblock *vbp,
                                            double sz,
                                            double mm2local);
 
+/* Stores vertex info for labelling with NMG index. */
+struct vtxlabel {
+    struct bu_list l;
+    point_t coord;
+    long int index;
+};
 
 __END_DECLS
 

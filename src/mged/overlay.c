@@ -28,7 +28,6 @@
 
 #include "vmath.h"
 #include "raytrace.h"
-#include "bn/vlist.h"
 
 #include "./mged.h"
 #include "./sedit.h"
