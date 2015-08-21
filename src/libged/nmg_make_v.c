@@ -39,8 +39,6 @@ struct tmp_v {
     struct vertex *v;
 };
 
-extern struct vertexuse* nmg_mvvu(uint32_t *upptr, struct model *m);
-
 int
 ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
 {
@@ -108,20 +106,14 @@ ged_nmg_make_v(struct ged *gedp, int argc, const char *argv[])
             sizeof(struct tmp_v), "verts");
 
     for (idx=0; idx < num_verts; idx++){
+        struct shell* ns = nmg_msv(r);
+        NMG_CK_SHELL(ns);
+
         verts[idx].pt[0] = (fastf_t)atof(argv[idx*3+3]);
         verts[idx].pt[1] = (fastf_t)atof(argv[idx*3+4]);
         verts[idx].pt[2] = (fastf_t)atof(argv[idx*3+5]);
 
-        if ( s->vu_p == NULL ) {
-            struct vertexuse* vu = nmg_mvvu(&s->l.magic, m);
-            NMG_CK_VERTEXUSE(vu);
-            nmg_vertex_gv(vu->v_p, verts[idx].pt);
-            s->vu_p = vu;
-        } else {
-            struct shell* ns = nmg_msv(r);
-            NMG_CK_SHELL(ns);
-            nmg_vertex_gv( ns->vu_p->v_p, verts[idx].pt);
-        }
+        nmg_vertex_gv( ns->vu_p->v_p, verts[idx].pt);
     }
 
     tol.magic = BN_TOL_MAGIC;
