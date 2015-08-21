@@ -75,6 +75,8 @@ ged_nmg(struct ged *gedp, int argc, const char *argv[])
                 "vertex specified by the coordinates x_initial y_initial "
                 "z_initial to the position with coordinates x_final y_final "
                 "z_final.\n");
+    bu_vls_printf(gedp->ged_result_str, "\tmake V         -  creates a new "
+                "vertex in the nmg object.\n");
     return GED_HELP;
     }
 

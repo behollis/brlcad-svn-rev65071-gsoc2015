@@ -24,15 +24,6 @@
  */
 
 #include "common.h"
-
-#include <string.h>
-
-#include "bu/cmd.h"
-#include "rt/geom.h"
-
-#include "./ged_private.h"
-
-#include "common.h"
 #include "nmg.h"
 
 #include <signal.h>
