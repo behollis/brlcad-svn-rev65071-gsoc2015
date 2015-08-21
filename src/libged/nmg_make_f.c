@@ -32,8 +32,8 @@
 
 #include "./ged_private.h"
 
-#if 0
-void remove_vertex(const struct model* m, point_t rv)
+void
+find_vertices_in_nmg(const struct model* m, long int* UNUSED(v_ids), struct vertex** UNUSED(vt[]))
 {
     struct nmgregion *r;
     struct shell *s;
@@ -99,6 +99,7 @@ void remove_vertex(const struct model* m, point_t rv)
                         v = vu->v_p;
                         NMG_CK_VERTEX(v);
 
+#if 0
                         if (v->vg_p) {
                             NMG_CK_VERTEX_G(v->vg_p);
 
@@ -107,7 +108,7 @@ void remove_vertex(const struct model* m, point_t rv)
                                 nmg_klu(lu);
                             }
                         }
-
+#endif
                         continue;
                     }
 
@@ -132,9 +133,9 @@ void remove_vertex(const struct model* m, point_t rv)
                         v = vu->v_p;
                         NMG_CK_VERTEX(v);
 
+#if 0
                         if (v->vg_p) {
                             NMG_CK_VERTEX_G(v->vg_p);
-
                             if ( VNEAR_EQUAL(v->vg_p->coord,
                                  rv, BN_TOL_DIST) ) {
                                 nmg_kvu(vu);
@@ -142,6 +143,7 @@ void remove_vertex(const struct model* m, point_t rv)
                                 nmg_klu(lu);
                             }
                         }
+#endif
                     }
                 }
             }
@@ -163,6 +165,8 @@ void remove_vertex(const struct model* m, point_t rv)
                     NMG_CK_VERTEXUSE(vu);
                     v = vu->v_p;
                     NMG_CK_VERTEX(v);
+
+#if 0
                     if (v->vg_p) {
                         NMG_CK_VERTEX_G(v->vg_p);
                         if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
@@ -170,6 +174,7 @@ void remove_vertex(const struct model* m, point_t rv)
                             nmg_klu(lu);
                         }
                     }
+#endif
                     continue;
                 }
 
@@ -190,7 +195,7 @@ void remove_vertex(const struct model* m, point_t rv)
                     NMG_CK_VERTEXUSE(vu);
                     v = vu->v_p;
                     NMG_CK_VERTEX(v);
-
+#if 0
                     if (v->vg_p) {
                         NMG_CK_VERTEX_G(v->vg_p);
                         if ( VNEAR_EQUAL(v->vg_p->coord, rv, BN_TOL_DIST) ) {
@@ -199,6 +204,7 @@ void remove_vertex(const struct model* m, point_t rv)
                             nmg_klu(lu);
                         }
                     }
+#endif
                 }
             }
 
@@ -224,6 +230,7 @@ void remove_vertex(const struct model* m, point_t rv)
                 v = vu->v_p;
                 NMG_CK_VERTEX(v);
 
+#if 0
                 if (v->vg_p) {
                     NMG_CK_VERTEX_G(v->vg_p);
 
@@ -232,6 +239,7 @@ void remove_vertex(const struct model* m, point_t rv)
                         nmg_keu(eu);
                     }
                 }
+#endif
             }
 
             /* Lone vertex in shell */
@@ -242,7 +250,7 @@ void remove_vertex(const struct model* m, point_t rv)
                 NMG_CK_VERTEXUSE(vu);
                 v = vu->v_p;
                 NMG_CK_VERTEX(v);
-
+#if 0
                 if (v->vg_p) {
                     NMG_CK_VERTEX_G(v->vg_p);
 
@@ -250,23 +258,21 @@ void remove_vertex(const struct model* m, point_t rv)
                         nmg_kvu(vu);
                     }
                 }
+#endif
             }
         }
     }
 }
-#endif
 
 int
-ged_nmg_make_f(struct ged* UNUSED(gedp), int UNUSED(argc), const char* UNUSED(argv[]))
+ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
 {
-#if 0
     struct rt_db_internal internal;
     struct directory *dp;
     struct model* m;
     const char* name;
-    point_t vt;
 
-    static const char *usage = "kill V x y z";
+    static const char *usage = "make F v0 v1 ... vn";
 
     GED_CHECK_DATABASE_OPEN(gedp, GED_ERROR);
     GED_CHECK_DRAWABLE(gedp, GED_ERROR);
@@ -303,12 +309,11 @@ ged_nmg_make_f(struct ged* UNUSED(gedp), int UNUSED(argc), const char* UNUSED(ar
         return GED_ERROR;
     }
 
-    vt[0] = atof(argv[3]); vt[1] = atof(argv[4]); vt[2] = atof(argv[5]);
-
     m = (struct model *)internal.idb_ptr;
     NMG_CK_MODEL(m);
 
-    remove_vertex(m, vt);
+    find_vertices_in_nmg(m, NULL, NULL);
+
 
     if ( wdb_put_internal(gedp->ged_wdbp, name, &internal, 1.0) < 0 ) {
         bu_vls_printf(gedp->ged_result_str, "wdb_put_internal(%s)", argv[1]);
@@ -317,7 +322,6 @@ ged_nmg_make_f(struct ged* UNUSED(gedp), int UNUSED(argc), const char* UNUSED(ar
     }
 
     rt_db_free_internal(&internal);
-#endif
 
     return GED_OK;
 }
