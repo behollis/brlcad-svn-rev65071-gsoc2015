@@ -365,7 +365,7 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
             v_ids[num_verts++] = atof(argv[idx]);
         }
         if ( ( BU_STR_EQUAL( "F", argv[idx] ) || idx == argc - 1 )
-             && num_verts > 3 )   {
+             && num_verts >= 3 )   {
             vstructs = (struct vertex ***) bu_calloc( num_verts,
                                    sizeof(struct vertex **), "face_verts");
             fu = make_face(m, v_ids, vstructs, num_verts);
@@ -389,7 +389,7 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
                 nmg_rebound(m, &tol);
             }
             num_verts = 0;
-        } else if ( BU_STR_EQUAL( "F", argv[idx] )  && num_verts < 3 )   {
+        } else if ( BU_STR_EQUAL( "F", argv[idx] ) && num_verts < 3 )   {
             num_verts = 0;
         }
     }
