@@ -269,15 +269,20 @@ make_face(const struct model* m, long int* v_ids, struct vertex*** vt, int num_v
         }
     }
 
-    r = BU_LIST_FIRST(nmgregion, &m->r_hd);
-    s = BU_LIST_FIRST(shell, &r->s_hd);
+    fu = NULL;
+    if ( found_idx == num_verts ) {
+        r = BU_LIST_FIRST(nmgregion, &m->r_hd);
+        s = BU_LIST_FIRST(shell, &r->s_hd);
 
-    NMG_CK_REGION(r);
-    NMG_CK_SHELL(s);
+        NMG_CK_REGION(r);
+        NMG_CK_SHELL(s);
 
-    return nmg_cmface( s, vt, num_verts );
+        fu = nmg_cmface( s, vt, num_verts );
+    }
 
     bu_free((char *) verts, "verts");
+
+    return fu;
 }
 
 int
@@ -288,12 +293,13 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
     struct model* m;
     const char* name;
     struct vertex*** vstructs;
-    long int v_ids[3] = {0}; /* default max of 50 vertices per face */
-    int num_verts = 3;
+    long int v_ids[50] = {0}; /* default max of 50 vertices per face */
+    int num_verts;
     struct faceuse* fu;
     struct shell* s;
     struct nmgregion* r;
     struct bn_tol tol;
+    int idx;
 
     static const char *usage = "make F v0 v1 ... vn";
 
@@ -307,6 +313,12 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
 
     /* must be wanting help */
     if (argc < 6) {
+        bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
+        return GED_HELP;
+    }
+
+    /* check for less than three vertices per face */
+    if (argc < 5 ) {
         bu_vls_printf(gedp->ged_result_str, "Usage: %s %s", argv[0], usage);
         return GED_HELP;
     }
@@ -346,27 +358,41 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
     NMG_CK_REGION(r);
     NMG_CK_SHELL(s);
 
-    vstructs = (struct vertex ***) bu_calloc( num_verts,
-                   sizeof(struct vertex **), "face_verts");
+    /* process faces */
+    num_verts = 0;
+    for (idx = 3; idx < argc; idx++){
+        if ( !BU_STR_EQUAL( "F", argv[idx] ) ) {
+            v_ids[num_verts++] = atof(argv[idx]);
+        }
+        if ( ( BU_STR_EQUAL( "F", argv[idx] ) || idx == argc - 1 )
+             && num_verts > 3 )   {
+            vstructs = (struct vertex ***) bu_calloc( num_verts,
+                                   sizeof(struct vertex **), "face_verts");
+            fu = make_face(m, v_ids, vstructs, num_verts);
+            bu_free((char *) vstructs, "face_verts");
 
-    v_ids[0] = atof(argv[3]); v_ids[1] = atof(argv[4]); v_ids[2] = atof(argv[5]);
-    fu = make_face(m, v_ids, vstructs, num_verts);
+            if ( fu ) {
+                /* assign face geometry */
+                if (s) {
+                   for (BU_LIST_FOR (fu, faceuse, &s->fu_hd)) {
+                       if (fu->orientation != OT_SAME) continue;
+                       nmg_calc_face_g(fu);
+                   }
+                }
 
-    /* assign face geometry */
-    if (s) {
-       for (BU_LIST_FOR (fu, faceuse, &s->fu_hd)) {
-           if (fu->orientation != OT_SAME) continue;
-           nmg_calc_face_g(fu);
-       }
+                tol.magic = BN_TOL_MAGIC;
+                tol.dist = 0.0005;
+                tol.dist_sq = tol.dist * tol.dist;
+                tol.perp = 1e-6;
+                tol.para = 1 - tol.perp;
+
+                nmg_rebound(m, &tol);
+            }
+            num_verts = 0;
+        } else if ( BU_STR_EQUAL( "F", argv[idx] )  && num_verts < 3 )   {
+            num_verts = 0;
+        }
     }
-
-    tol.magic = BN_TOL_MAGIC;
-    tol.dist = 0.0005;
-    tol.dist_sq = tol.dist * tol.dist;
-    tol.perp = 1e-6;
-    tol.para = 1 - tol.perp;
-
-    nmg_rebound(m, &tol);
 
     if ( wdb_put_internal(gedp->ged_wdbp, name, &internal, 1.0) < 0 ) {
         bu_vls_printf(gedp->ged_result_str, "wdb_put_internal(%s)", argv[1]);
@@ -375,7 +401,6 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
     }
 
     rt_db_free_internal(&internal);
-    bu_free((char *) vstructs, "face_verts");
 
     return GED_OK;
 }
