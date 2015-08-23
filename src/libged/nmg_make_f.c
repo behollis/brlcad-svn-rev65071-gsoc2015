@@ -60,7 +60,7 @@ make_face(const struct model* m, long int* v_ids, struct vertex*** vt, int num_v
             sizeof(struct tmp_v), "verts");
 
     found_idx = 0;
-    for (idx = 0; idx < 3; idx++) {
+    for (idx = 0; idx < num_verts; idx++) {
         for (BU_LIST_FOR(r, nmgregion, &m->r_hd)) {
             NMG_CK_REGION(r);
 
@@ -360,38 +360,39 @@ ged_nmg_make_f(struct ged* gedp, int argc, const char* argv[])
 
     /* process faces */
     num_verts = 0;
-    for (idx = 3; idx < argc; idx++){
-        if ( !BU_STR_EQUAL( "F", argv[idx] ) ) {
+    for (idx = 3; idx < argc; idx++) {
+        if ( ! BU_STR_EQUAL( "F", argv[idx] ) ) {
             v_ids[num_verts++] = atof(argv[idx]);
         }
-        if ( ( BU_STR_EQUAL( "F", argv[idx] ) || idx == argc - 1 )
-             && num_verts >= 3 )   {
-            vstructs = (struct vertex ***) bu_calloc( num_verts,
-                                   sizeof(struct vertex **), "face_verts");
-            fu = make_face(m, v_ids, vstructs, num_verts);
-            bu_free((char *) vstructs, "face_verts");
+        if ( BU_STR_EQUAL( "F", argv[idx] )|| idx == argc - 1 ) {
+            if ( num_verts >= 3 ) {
+				vstructs = (struct vertex ***) bu_calloc( num_verts,
+									   sizeof(struct vertex **), "face_verts");
+				fu = make_face(m, v_ids, vstructs, num_verts);
+				bu_free((char *) vstructs, "face_verts");
 
-            if ( fu ) {
-                /* assign face geometry */
-                if (s) {
-                   for (BU_LIST_FOR (fu, faceuse, &s->fu_hd)) {
-                       if (fu->orientation != OT_SAME) continue;
-                       nmg_calc_face_g(fu);
-                   }
-                }
+				if ( fu ) {
+					/* assign face geometry */
+					if (s) {
+					   for (BU_LIST_FOR (fu, faceuse, &s->fu_hd)) {
+						   if (fu->orientation != OT_SAME) continue;
+						   nmg_calc_face_g(fu);
+					   }
+					}
 
-                tol.magic = BN_TOL_MAGIC;
-                tol.dist = 0.0005;
-                tol.dist_sq = tol.dist * tol.dist;
-                tol.perp = 1e-6;
-                tol.para = 1 - tol.perp;
+					tol.magic = BN_TOL_MAGIC;
+					tol.dist = 0.0005;
+					tol.dist_sq = tol.dist * tol.dist;
+					tol.perp = 1e-6;
+					tol.para = 1 - tol.perp;
 
-                nmg_rebound(m, &tol);
+					nmg_rebound(m, &tol);
+				}
+				num_verts = 0;
+            } else {
+            	num_verts = 0;
             }
-            num_verts = 0;
-        } else if ( BU_STR_EQUAL( "F", argv[idx] ) && num_verts < 3 )   {
-            num_verts = 0;
-        }
+    	}
     }
 
     if ( wdb_put_internal(gedp->ged_wdbp, name, &internal, 1.0) < 0 ) {
